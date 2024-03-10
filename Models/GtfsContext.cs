@@ -8,7 +8,7 @@ public class GtfsContext : DbContext
     {
         // Configuration handled by base(options)
     }
-
+    
     public DbSet<Agency> Agencies { get; set; } = null!;
     public DbSet<GtfsRoute> GtfsRoutes { get; set; } = null!;
     public DbSet<Stop> Stops { get; set; } = null!;

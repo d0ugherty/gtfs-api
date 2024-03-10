@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 
 // Database Context
 builder.Services.AddDbContext<GtfsContext>(opt =>
-    opt.UseSqlite(builder.Configuration.GetConnectionString("GtfsContext") ?? "Data Source = gtfs.db"));;
+    opt.UseSqlite(builder.Configuration.GetConnectionString("GtfsApiDatabase") ?? "Data Source = gtfs.db"));;
 
 
 
