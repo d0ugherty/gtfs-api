@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GtfsApi.Models;
 
-public class Route
+public class GtfsRoute
 {
     public int Id { get; set; }
     public string RouteId { get; set; }

@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using GtfsApi.Models;
-using RouteContext = GtfsApi.Models.RouteContext;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,35 +9,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
 // Database Context
-builder.Services.AddDbContext<AgencyContext>(opt =>
-    opt.UseInMemoryDatabase("GtfsData"));
-
-builder.Services.AddDbContext<RouteContext>(opt =>
-    opt.UseInMemoryDatabase("GtfsData"));
-
-builder.Services.AddDbContext<StopContext>(opt =>
-    opt.UseInMemoryDatabase("GtfsData"));
-
-builder.Services.AddDbContext<StopTimeContext>(opt =>
-    opt.UseInMemoryDatabase("GtfsData"));
-
-builder.Services.AddDbContext<TripContext>(opt =>
-    opt.UseInMemoryDatabase("GtfsData"));
-
-builder.Services.AddDbContext<ShapeContext>(opt =>
-    opt.UseInMemoryDatabase("GtfsData"));
-
-builder.Services.AddDbContext<CalendarContext>(opt =>
-    opt.UseInMemoryDatabase("GtfsData"));
-
-builder.Services.AddDbContext<CalendarDateContext>(opt =>
-    opt.UseInMemoryDatabase("GtfsData"));
-
-builder.Services.AddDbContext<FareContext>(opt =>
-    opt.UseInMemoryDatabase("GtfsData"));
-
-builder.Services.AddDbContext<FareAttributesContext>(opt =>
-    opt.UseInMemoryDatabase("GtfsData"));
+builder.Services.AddDbContext<GtfsContext>(opt =>
+    opt.UseSqlite(builder.Configuration.GetConnectionString("GtfsContext") ?? "Data Source = gtfs.db"));;
 
 
 
