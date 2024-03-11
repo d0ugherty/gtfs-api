@@ -10,11 +10,12 @@ public class GtfsRoute
     public string LongName { get; set; }
     public string? Description { get; set; }
     public int Type { get; set; }
-    public string Color { get; set; }
+    public string? Color { get; set; }
     public string? TextColor { get; set; }
     public string? Url { get; set; }
+    public string AgencyId { get; set; }
     
     [ForeignKey("Agency")]
-    public int AgencyId { get; set; }
+    public int FkAgencyId { get; set; }
     public virtual Agency Agency { get; set; }
 }

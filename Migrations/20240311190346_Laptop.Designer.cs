@@ -3,6 +3,7 @@ using System;
 using GtfsApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GtfsApi.Migrations
 {
     [DbContext(typeof(GtfsContext))]
-    partial class GtfsContextModelSnapshot : ModelSnapshot
+    [Migration("20240311190346_Laptop")]
+    partial class Laptop
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.2");
@@ -176,9 +179,8 @@ namespace GtfsApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("AgencyId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("AgencyId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Color")
                         .IsRequired()
@@ -186,9 +188,6 @@ namespace GtfsApi.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("FkAgencyId")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("LongName")
                         .IsRequired()
@@ -213,7 +212,7 @@ namespace GtfsApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FkAgencyId");
+                    b.HasIndex("AgencyId");
 
                     b.ToTable("GtfsRoutes");
                 });
@@ -380,7 +379,7 @@ namespace GtfsApi.Migrations
                 {
                     b.HasOne("GtfsApi.Models.Agency", "Agency")
                         .WithMany()
-                        .HasForeignKey("FkAgencyId")
+                        .HasForeignKey("AgencyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
