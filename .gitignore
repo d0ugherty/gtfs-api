@@ -3,10 +3,8 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
-Properties
 *.csproj
-*.http
-*.json
+
 
 # dotenv files
 .env
