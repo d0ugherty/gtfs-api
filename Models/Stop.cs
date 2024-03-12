@@ -3,7 +3,7 @@ namespace GtfsApi.Models;
 public class Stop
 {
     public int Id { get; set; }
-    public string StopId { get; set; }
+    public int StopId { get; set; }
     public string Name { get; set; }
     public string? Description { get; set; }
     public float Latitude { get; set; }

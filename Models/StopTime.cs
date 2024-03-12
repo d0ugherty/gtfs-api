@@ -18,7 +18,7 @@ public class StopTime
     public int? PickupType { get; set; }
     public int? DropoffType { get; set; }
     public int StopId { get; set; }
-    public int TripId { get; set; }
+    public string TripId { get; set; }
     
     [ForeignKey("Stop")]
     public int FkStopId { get; set; }
