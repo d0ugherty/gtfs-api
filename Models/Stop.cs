@@ -8,6 +8,6 @@ public class Stop
     public string? Description { get; set; }
     public float Latitude { get; set; }
     public float Longitude { get; set; }
-    public string ZoneId { get; set; }
+    public string? ZoneId { get; set; }
     public string? Url { get; set; }
 }

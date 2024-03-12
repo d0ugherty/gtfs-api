@@ -6,12 +6,13 @@ public class FareAttributes
 {
     public int Id { get; set; }
     public float Price { get; set; }
-    public string CurrencyType { get; set; }
-    public int PaymentMethod { get; set; }
-    public int Transfers { get; set; }
-    public int TransferDuration { get; set; }
+    public string? CurrencyType { get; set; }
+    public int? PaymentMethod { get; set; }
+    public int? Transfers { get; set; }
+    public int? TransferDuration { get; set; }
+    public int FareId { get; set; }
     
     [ForeignKey("Fare")]
-    public int FareId { get; set; }
-    public virtual Fare Fare { get; set; }
+    public int FkFareId { get; set; }
+    public virtual Fare? Fare { get; set; }
 }

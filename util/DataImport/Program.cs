@@ -19,8 +19,8 @@ namespace DataImportUtility
 		    var options = optionsBuilder.Options;
 
 		    var importService = new DataImportService(new GtfsContext(options));
-		    importService.ImportData("../../data/routes.csv");
-
+		    importService.ImportData();
+		    
 		    Console.WriteLine("Data import completed successfully.");
 	    }
     }

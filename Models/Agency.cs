@@ -8,5 +8,5 @@ public class Agency
     public string? Url { get; set; }
     public string Timezone { get; set; }
     public string Language { get; set; }
-    public string? email { get; set; }
+    public string? Email { get; set; }
 }

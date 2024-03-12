@@ -11,6 +11,6 @@ public class Calendar
     public int Friday { get; set; }
     public int? Saturday { get; set; }
     public int? Sunday { get; set; }
-    public string StartDate { get; set; }
-    public string EndDate { get; set; }
+    public string? StartDate { get; set; }
+    public string? EndDate { get; set; }
 }

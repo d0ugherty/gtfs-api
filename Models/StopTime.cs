@@ -15,14 +15,16 @@ public class StopTime
     public DateTime DepartureTime { get; set; }
     
     public int StopSequence { get; set; }
-    public int PickupType { get; set; }
-    public int DropoffType { get; set; }
+    public int? PickupType { get; set; }
+    public int? DropoffType { get; set; }
+    public int StopId { get; set; }
+    public int TripId { get; set; }
     
     [ForeignKey("Stop")]
-    public int StopId { get; set; }
-    public virtual Stop Stop { get; set; }
+    public int FkStopId { get; set; }
+    public virtual Stop? Stop { get; set; }
     
     [ForeignKey("Trip")]
-    public int TripId { get; set; }
-    public virtual Trip Trip { get; set; }
+    public int FkTripId { get; set; }
+    public virtual Trip? Trip { get; set; }
 }
