@@ -10,9 +10,9 @@ public class FareAttributes
     public int? PaymentMethod { get; set; }
     public int? Transfers { get; set; }
     public int? TransferDuration { get; set; }
-    public string FareId { get; set; }
+   
     
     [ForeignKey("Fare")]
-    public int FkFareId { get; set; }
+    public int FareId { get; set; }
     public virtual Fare? Fare { get; set; }
 }

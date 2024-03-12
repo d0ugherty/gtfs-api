@@ -2,7 +2,7 @@ namespace DataImportUtility;
 
 public class CalendarCsv
 {
-	public string? service_id { get; set; }
+	public string service_id { get; set; }
 	public int monday { get; set; }
 	public int tuesday { get; set; }
 	public int wednesday { get; set; }

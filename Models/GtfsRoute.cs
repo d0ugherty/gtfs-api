@@ -13,9 +13,9 @@ public class GtfsRoute
     public string? Color { get; set; }
     public string? TextColor { get; set; }
     public string? Url { get; set; }
-    public string AgencyId { get; set; }
+    
     
     [ForeignKey("Agency")]
-    public int FkAgencyId { get; set; }
+    public int AgencyId { get; set; }
     public virtual Agency Agency { get; set; }
 }

@@ -37,6 +37,8 @@ namespace DataImportUtility
                         Email = record.agency_email
                     });
                 }
+
+                _context.SaveChanges();
             }
         } 
 
@@ -61,8 +63,7 @@ namespace DataImportUtility
                         Color = record.route_color, 
                         TextColor = record.route_text_color,
                         Url = record.route_url,
-                        AgencyId = record.agency_id,
-                        FkAgencyId = agency.Id
+                        AgencyId = agency.Id
                     });
                 }
 
@@ -191,10 +192,9 @@ namespace DataImportUtility
                         Headsign = record.trip_headsign,
                         BlockId = record.block_id,
                         ShortName = record.trip_short_name,
-                        ShapeId = tripShapeId,
-                        RouteId = tripRouteId,
-                        FkRouteId = route.Id,
-                        FkShapeId = shape.Id
+                        DirectionId = record.direction_id,
+                        RouteId = route.Id,
+                        ShapeId = shape.Id
                     });
                 }
                 _context.SaveChanges();
@@ -223,10 +223,8 @@ namespace DataImportUtility
                        StopSequence = record.stop_sequence,
                        PickupType = record.pickup_type,
                        DropoffType = record.dropoff_type,
-                       StopId = record.stop_id,
-                       TripId = record.trip_id,
-                       FkStopId = stop.Id,
-                       FkTripId = trip.Id
+                       StopId = stop.Id,
+                       TripId = trip.Id
                     });
                 }
 
@@ -274,8 +272,7 @@ namespace DataImportUtility
                         PaymentMethod = record.payment_method,
                         Transfers = record.transfers,
                         TransferDuration = record.transfer_duration,
-                        FareId = fareId,
-                        FkFareId = fare.Id
+                        FareId = fare.Id
                     });
                 }
                 _context.SaveChanges();

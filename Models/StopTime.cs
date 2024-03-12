@@ -17,14 +17,12 @@ public class StopTime
     public int StopSequence { get; set; }
     public int? PickupType { get; set; }
     public int? DropoffType { get; set; }
-    public int StopId { get; set; }
-    public string TripId { get; set; }
     
     [ForeignKey("Stop")]
-    public int FkStopId { get; set; }
+    public int StopId { get; set; }
     public virtual Stop? Stop { get; set; }
     
     [ForeignKey("Trip")]
-    public int FkTripId { get; set; }
+    public int TripId { get; set; }
     public virtual Trip? Trip { get; set; }
 }

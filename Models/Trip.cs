@@ -11,16 +11,14 @@ public class Trip
     public int BlockId { get; set; }
     public string? ShortName { get; set; }
     public string? LongName { get; set; }
-    public int ShapeId { get; set; }
-    public string RouteId { get; set; }
-    
+ 
     [ForeignKey("Shape")]
-    public int FkShapeId { get; set; }
+    public int ShapeId { get; set; }
     public virtual Shape Shape { get; set; }
     
     public int DirectionId { get; set; }
     
     [ForeignKey("Route")]
-    public int FkRouteId { get; set; }
+    public int RouteId { get; set; }
     public virtual GtfsRoute GtfsRoute { get; set; }
 }
