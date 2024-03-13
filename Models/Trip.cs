@@ -11,10 +11,7 @@ public class Trip
     public int BlockId { get; set; }
     public string? ShortName { get; set; }
     public string? LongName { get; set; }
- 
-    [ForeignKey("Shape")]
     public int ShapeId { get; set; }
-    public virtual Shape Shape { get; set; }
     
     public int DirectionId { get; set; }
     

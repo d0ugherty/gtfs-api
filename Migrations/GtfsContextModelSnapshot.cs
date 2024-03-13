@@ -153,8 +153,8 @@ namespace GtfsApi.Migrations
                     b.Property<float>("Price")
                         .HasColumnType("REAL");
 
-                    b.Property<int?>("TransferDuration")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("TransferDuration")
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("Transfers")
                         .HasColumnType("INTEGER");
@@ -316,9 +316,6 @@ namespace GtfsApi.Migrations
                     b.Property<int>("DirectionId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("GtfsRouteId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Headsign")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -345,9 +342,7 @@ namespace GtfsApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GtfsRouteId");
-
-                    b.HasIndex("ShapeId");
+                    b.HasIndex("RouteId");
 
                     b.ToTable("Trips");
                 });
@@ -397,19 +392,11 @@ namespace GtfsApi.Migrations
                 {
                     b.HasOne("GtfsApi.Models.GtfsRoute", "GtfsRoute")
                         .WithMany()
-                        .HasForeignKey("GtfsRouteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GtfsApi.Models.Shape", "Shape")
-                        .WithMany()
-                        .HasForeignKey("ShapeId")
+                        .HasForeignKey("RouteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("GtfsRoute");
-
-                    b.Navigation("Shape");
                 });
 #pragma warning restore 612, 618
         }

@@ -8,7 +8,14 @@ public class GtfsContext : DbContext
     {
         // Configuration handled by base(options)
     }
-    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Trip>()
+            .HasOne(t => t.GtfsRoute)
+            .WithMany() 
+            .HasForeignKey(t => t.RouteId);
+    }
+
     public DbSet<Agency> Agencies { get; set; } = null!;
     public DbSet<GtfsRoute> GtfsRoutes { get; set; } = null!;
     public DbSet<Stop> Stops { get; set; } = null!;

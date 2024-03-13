@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using GtfsApi.Models;
+using Microsoft.AspNetCore.HttpLogging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +13,11 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<GtfsContext>(opt =>
     opt.UseSqlite(builder.Configuration.GetConnectionString("GtfsApiDatabase") ?? "Data Source = gtfs.db"));
 
+builder.Services.AddHttpLogging(
+    opts => opts.LoggingFields = HttpLoggingFields.RequestProperties);
 
+builder.Logging.AddFilter(
+    "Microsoft.AspNetCore.HttpLogging", LogLevel.Information);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -24,6 +29,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseHttpLogging();
 }
 
 app.UseHttpsRedirection();

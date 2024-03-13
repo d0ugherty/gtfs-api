@@ -9,7 +9,7 @@ public class FareAttributes
     public string? CurrencyType { get; set; }
     public int? PaymentMethod { get; set; }
     public int? Transfers { get; set; }
-    public int? TransferDuration { get; set; }
+    public string? TransferDuration { get; set; }
    
     
     [ForeignKey("Fare")]
