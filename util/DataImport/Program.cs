@@ -10,7 +10,6 @@ namespace DataImportUtility
 	    static void Main(string[] args)
 	    {
 		    var databasePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"../../../../../gtfs.db"));
-		    Console.WriteLine($"DATABASE PATH: {databasePath}");
 		    var connectionString = $"Data Source={databasePath};";
 		    
 		    

@@ -15,5 +15,5 @@ public class StopTimesCsv
 	public int stop_id { get; set; }
 	public int stop_sequence { get; set; }
 	public int? pickup_type { get; set; }
-	public int? dropoff_type { get; set; }
+	public int? drop_off_type { get; set; }
 }

@@ -149,9 +149,15 @@ namespace DataImportUtility
         private void ImportShapes(string filePath)
         {
             using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                MissingFieldFound = null
+            }))
             {
                 var records = csv.GetRecords<ShapesCsv>();
+                csv.Read();
+                csv.ReadHeader();
+                var distTravelledExists = csv.HeaderRecord.Contains("shape_dist_traveled");
 
                 foreach (var record in records)
                 {
@@ -164,6 +170,7 @@ namespace DataImportUtility
                         DistanceTraveled = record.shape_dist_traveled
                     });
                 }
+
                 _context.SaveChanges();
             }
         }
@@ -177,14 +184,14 @@ namespace DataImportUtility
 
                 foreach (var record in records)
                 {
-                    var tripShapeId = record.shape_id;
+                    /**var tripShapeId = record.shape_id;
                     var shape = _context.Shapes.SingleOrDefault(sh => sh.ShapeId == tripShapeId)
                                 ?? _context.Shapes.Add(new Shape { ShapeId = tripShapeId }).Entity;
-
+                    **/
                     var tripRouteId = record.route_id;
                     var route = _context.GtfsRoutes.SingleOrDefault(rt => rt.RouteId == tripRouteId)
                                 ?? _context.GtfsRoutes.Add(new GtfsRoute { RouteId = tripRouteId }).Entity;
-
+                    
                     _context.Trips.Add(new Trip
                     {
                         ServiceId = record.service_id,
@@ -194,7 +201,7 @@ namespace DataImportUtility
                         ShortName = record.trip_short_name,
                         DirectionId = record.direction_id,
                         RouteId = route.Id,
-                        ShapeId = shape.Id
+                        ShapeId = record.shape_id
                     });
                 }
                 _context.SaveChanges();
@@ -222,7 +229,7 @@ namespace DataImportUtility
                        DepartureTime = record.departure_time,
                        StopSequence = record.stop_sequence,
                        PickupType = record.pickup_type,
-                       DropoffType = record.dropoff_type,
+                       DropoffType = record.drop_off_type,
                        StopId = stop.Id,
                        TripId = trip.Id
                     });

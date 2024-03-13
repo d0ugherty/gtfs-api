@@ -7,5 +7,5 @@ public class FareAttributesCsv
 	public string currency_type { get; set; }
 	public int? payment_method { get; set; }
 	public int? transfers { get; set; }
-	public int? transfer_duration { get; set; }
+	public string? transfer_duration { get; set; }
 }
