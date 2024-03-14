@@ -1,3 +1,5 @@
+using GtfsApi.Migrations;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using GtfsApi.Models;
 using Microsoft.AspNetCore.HttpLogging;
@@ -9,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
+builder.Services.AddRazorPages();
 // Database Context
 builder.Services.AddDbContext<GtfsContext>(opt =>
     opt.UseSqlite(builder.Configuration.GetConnectionString("GtfsApiDatabase") ?? "Data Source = gtfs.db"));
@@ -24,18 +27,22 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.UseHttpLogging();
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
 }
 
+app.UseSwagger();
+app.UseSwaggerUI();
+app.UseStaticFiles();
+app.UseHttpLogging();
 app.UseHttpsRedirection();
-
+app.UseRouting();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.MapRazorPages();
 app.Run();
