@@ -39,7 +39,7 @@ namespace GtfsApi.Controllers
         [HttpGet("Stops/{agencyId}")]
         public async Task<ActionResult<IEnumerable<Stop>>> GetAgencyStops(string agencyId)
         {
-            var stops = await _context.Stops.ToListAsync();
+            var stops = await _context.Stops.ToListAsync(); 
             return stops;
         }
        
