@@ -77,7 +77,8 @@ namespace DataImportUtility
                         TextColor = record.route_text_color,
                         Url = record.route_url,
                         AgencyName = record.agency_id,
-                        AgencyId = agency.Id
+                        AgencyId = agency.Id,
+                        Agency = agency
                     });
                 }
 
@@ -232,6 +233,7 @@ namespace DataImportUtility
                         ShortName = record.trip_short_name,
                         DirectionId = record.direction_id,
                         RouteId = route.Id,
+                        Route = route,
                         ShapeId = record.shape_id
                     });
                 }
@@ -267,7 +269,9 @@ namespace DataImportUtility
                        PickupType = record.pickup_type,
                        DropoffType = record.drop_off_type,
                        StopId = stop.Id,
-                       TripId = trip.Id
+                       Stop = stop,
+                       TripId = trip.Id,
+                       Trip = trip
                     });
                 }
 
@@ -325,7 +329,8 @@ namespace DataImportUtility
                         PaymentMethod = record.payment_method,
                         Transfers = record.transfers,
                         TransferDuration = record.transfer_duration,
-                        FareId = fare.Id
+                        FareId = fare.Id,
+                        Fare = fare
                     });
                 }
                 _context.SaveChanges();
