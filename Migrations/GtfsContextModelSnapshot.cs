@@ -175,6 +175,10 @@ namespace GtfsApi.Migrations
                     b.Property<int>("AgencyId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("AgencyName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Color")
                         .HasColumnType("TEXT");
 
@@ -310,8 +314,9 @@ namespace GtfsApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("BlockId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("BlockId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("DirectionId")
                         .HasColumnType("INTEGER");

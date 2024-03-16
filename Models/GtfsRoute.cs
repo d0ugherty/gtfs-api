@@ -13,6 +13,7 @@ public class GtfsRoute
     public string? Color { get; set; }
     public string? TextColor { get; set; }
     public string? Url { get; set; }
+    public string AgencyName { get; set; }
     
     
     [ForeignKey("Agency")]

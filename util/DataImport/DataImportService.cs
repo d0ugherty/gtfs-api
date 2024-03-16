@@ -76,6 +76,7 @@ namespace DataImportUtility
                         Color = record.route_color, 
                         TextColor = record.route_text_color,
                         Url = record.route_url,
+                        AgencyName = record.agency_id,
                         AgencyId = agency.Id
                     });
                 }

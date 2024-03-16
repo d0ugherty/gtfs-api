@@ -1,4 +1,16 @@
 ﻿@page
 @model GtfsApi.Pages.FareCalcModel
 @{
+    ViewData["Title"] = "Fare Calculator";
 }
+
+<link rel="stylesheet" href="~/@(nameof(GtfsApi)).styles.css"/>
+
+<h1>@ViewData["Title"]</h1>
+
+<select id="slct-agency">
+    @foreach (var agency in Model.Agencies)
+    {
+        <option value="@agency.Id">@agency.Name</option> 
+    }
+</select>

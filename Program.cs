@@ -24,6 +24,7 @@ builder.Logging.AddFilter(
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.WebHost.UseStaticWebAssets();
 
 var app = builder.Build();
 

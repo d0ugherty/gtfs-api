@@ -1,42 +1,47 @@
-using Microsoft.AspNetCore.Http;
+
 using Microsoft.AspNetCore.Mvc;
+using GtfsApi.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace GtfsApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GtfsController : ControllerBase
+    public class GtfsController : ControllerBase 
     {
-        // GET: api/<GtfsController>
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
+        private readonly GtfsContext  _context;
 
-        // GET api/<GtfsController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        public GtfsController(GtfsContext context)
         {
-            return "value";
+            _context = context;
         }
-
-        // POST api/<GtfsController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+       
+        [HttpGet("Agencies")]
+        public async Task<ActionResult<IEnumerable<Agency>>> GetAgencies()
         {
+            var agencies = await _context.Agencies.ToListAsync();
+            return agencies;
         }
-
-        // PUT api/<GtfsController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        
+        
+        [HttpGet("Routes/{agencyId}")]
+        public async Task<ActionResult<IEnumerable<GtfsRoute>>> GetAgencyRoutes(string agencyId)
         {
+            var routes = await _context.GtfsRoutes
+                .Where(rt => rt.AgencyName == agencyId.ToUpper())
+                .ToListAsync();
+            
+            return routes;
         }
-
-        // DELETE api/<GtfsController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        
+        // Finish this
+        [HttpGet("Stops/{agencyId}")]
+        public async Task<ActionResult<IEnumerable<Stop>>> GetAgencyStops(string agencyId)
         {
+            var stops = await _context.Stops.ToListAsync();
+            return stops;
         }
+       
     }
 }

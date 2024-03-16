@@ -8,7 +8,7 @@ public class Trip
     public string ServiceId { get; set; }
     public string TripId { get; set; }
     public string Headsign { get; set; }
-    public int BlockId { get; set; }
+    public string BlockId { get; set; }
     public string? ShortName { get; set; }
     public string? LongName { get; set; }
     public int ShapeId { get; set; }
