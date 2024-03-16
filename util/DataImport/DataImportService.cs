@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using CsvHelper.Configuration;
 using GtfsApi.Models;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Calendar = GtfsApi.Models.Calendar;
 
 namespace DataImportUtility
@@ -12,7 +13,8 @@ namespace DataImportUtility
     public class DataImportService
     {
         private readonly GtfsContext _context;
-
+        private readonly List<string> agencies = ["septa", "njt"];
+        private readonly List<string> modes = ["rail", "bus"];
         public DataImportService(GtfsContext context)
         {
             this._context = context;
@@ -21,8 +23,14 @@ namespace DataImportUtility
         private void ImportAgency(string filePath)
         {
             using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+                {
+                   MissingFieldFound = null
+                }))
             {
+                csv.Read();
+                csv.ReadHeader();
+                
                 var records = csv.GetRecords<AgencyCsv>();
 
                 foreach (var record in records)
@@ -45,10 +53,15 @@ namespace DataImportUtility
         private void ImportRoutes(string filePath)
         {
             using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+               {
+                   MissingFieldFound = null
+               }))
             {
+                csv.Read();
+                csv.ReadHeader();
                 var records = csv.GetRecords<RoutesCsv>();
-
+                
                 foreach (var record in records)
                 {
                     var agencyId = record.agency_id;
@@ -74,8 +87,13 @@ namespace DataImportUtility
         private void ImportCalendar(string filePath)
         {
             using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+                   {
+                       MissingFieldFound = null
+                   }))
             {
+                csv.Read();
+                csv.ReadHeader();
                 var records = csv.GetRecords<CalendarCsv>();
 
                 foreach (var record in records)
@@ -103,8 +121,13 @@ namespace DataImportUtility
         private void ImportCalendarDates(string filePath)
         {
             using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+                   {
+                       MissingFieldFound = null
+                   }))
             {
+                csv.Read();
+                csv.ReadHeader();
                 var records = csv.GetRecords<CalendarDatesCsv>();
 
                 foreach (var record in records)
@@ -124,8 +147,13 @@ namespace DataImportUtility
         private void ImportStops(string filePath)
         {
             using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+                   {
+                       MissingFieldFound = null
+                   }))
             {
+                csv.Read();
+                csv.ReadHeader();
                 var records = csv.GetRecords<StopsCsv>();
 
                 foreach (var record in records)
@@ -148,6 +176,7 @@ namespace DataImportUtility
 
         private void ImportShapes(string filePath)
         {
+            Console.WriteLine("Importing shapes may take a while...");
             using (var reader = new StreamReader(filePath))
             using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
             {
@@ -178,18 +207,19 @@ namespace DataImportUtility
         private void ImportTrips(string filePath)
         {
             using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+                   {
+                       MissingFieldFound = null
+                   }))
             {
+                csv.Read();
+                csv.ReadHeader();
                 var records = csv.GetRecords<TripsCsv>();
 
                 foreach (var record in records)
                 {
-                    /**var tripShapeId = record.shape_id;
-                    var shape = _context.Shapes.SingleOrDefault(sh => sh.ShapeId == tripShapeId)
-                                ?? _context.Shapes.Add(new Shape { ShapeId = tripShapeId }).Entity;
-                    **/
                     var tripRouteId = record.route_id;
-                    var route = _context.GtfsRoutes.SingleOrDefault(rt => rt.RouteId == tripRouteId)
+                    var route = _context.GtfsRoutes.FirstOrDefault(rt => rt.RouteId == tripRouteId)
                                 ?? _context.GtfsRoutes.Add(new GtfsRoute { RouteId = tripRouteId }).Entity;
                     
                     _context.Trips.Add(new Trip
@@ -211,16 +241,21 @@ namespace DataImportUtility
         private void ImportStopTimes(string filePath)
         {
             using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+                   {
+                       MissingFieldFound = null
+                   }))
             {
+                csv.Read();
+                csv.ReadHeader();
                 var records = csv.GetRecords<StopTimesCsv>();
 
                 foreach (var record in records)
                 {
-                    var stop = _context.Stops.SingleOrDefault(st => st.StopId == record.stop_id)
+                    var stop = _context.Stops.FirstOrDefault(st => st.StopId == record.stop_id)
                                 ?? _context.Stops.Add(new Stop { StopId = record.stop_id }).Entity;
 
-                    var trip = _context.Trips.SingleOrDefault(tr => tr.TripId == record.trip_id)
+                    var trip = _context.Trips.FirstOrDefault(tr => tr.TripId == record.trip_id)
                                ?? _context.Trips.Add(new Trip { TripId = record.trip_id }).Entity;
                     
                     _context.StopTimes.Add(new StopTime
@@ -242,8 +277,13 @@ namespace DataImportUtility
         private void ImportFares(string filePath)
         {
             using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+                   {
+                       MissingFieldFound = null
+                   }))
             {
+                csv.Read();
+                csv.ReadHeader();
                 var records = csv.GetRecords<FaresCsv>();
 
                 foreach (var record in records)
@@ -262,8 +302,13 @@ namespace DataImportUtility
         private void ImportFareAttributes(string filePath)
         {
             using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+                   {
+                       MissingFieldFound = null
+                   }))
             {
+                csv.Read();
+                csv.ReadHeader();
                 var records = csv.GetRecords<FareAttributesCsv>();
 
                 foreach (var record in records)
@@ -285,39 +330,56 @@ namespace DataImportUtility
                 _context.SaveChanges();
             }
         }
+
+        private bool ImportTry(string filePath, Action<string> import)
+        {
+            if (File.Exists(filePath))
+            {
+                try
+                {
+                    import(filePath);
+                    Console.WriteLine($"{filePath} \n successfully imported.");
+                    return true;
+                }
+                catch (ReaderException ex)
+                {
+                    Console.WriteLine($"Reader exception occurred, moving on to next import.");
+                    return false;
+                }
+            }
+            
+            Console.WriteLine($"{filePath} does not exist. \n Moving on to next import.");
+            return false;
+        }
         
         public void ImportData()
         {
-            ImportAgency("../../data/agency.csv");
-            Console.WriteLine("Agencies successfully imported.");
-            
-            ImportRoutes("../../data/routes.csv");
-            Console.WriteLine("Routes successfully imported.");
-            
-            ImportCalendar("../../data/calendar.csv");
-            Console.WriteLine("Calendar successfully imported.");
-            
-            ImportCalendarDates("../../data/calendar_dates.csv");
-            Console.WriteLine("Calendar dates successfully imported.");
-            
-            ImportStops("../../data/stops.csv");
-            Console.WriteLine("Stops successfully imported.");
-            
-            ImportShapes("../../data/shapes.csv");
-            Console.WriteLine("Shapes successfully imported.");
-            
-            ImportTrips("../../data/trips.csv");
-            Console.WriteLine("Trips successfully imported.");
-            
-            ImportStopTimes("../../data/stop_times.csv");
-            Console.WriteLine("Stop times successfully imported.");
-            
-            ImportFares("../../data/fare_rules.csv");
-            Console.WriteLine("Fare rules successfully imported.");
-            
-            ImportFareAttributes("../../data/fare_attributes.csv");
-            Console.WriteLine("Fare attributes successfully imported");
-            
+            foreach (var agency in agencies)
+            {
+                foreach (var mode in modes)
+                {
+                    ImportTry($"../../data/{agency}_{mode}/agency.csv", ImportAgency);
+
+                    ImportTry($"../../data/{agency}_{mode}/routes.csv", ImportRoutes);
+
+                    ImportTry($"../../data/{agency}_{mode}/calendar.csv", ImportCalendar);
+
+                    ImportTry($"../../data/{agency}_{mode}/calendar_dates.csv", ImportCalendarDates);
+
+                    ImportTry($"../../data/{agency}_{mode}/stops.csv", ImportStops);
+
+                    ImportTry($"../../data/{agency}_{mode}/shapes.csv", ImportShapes);
+
+                    ImportTry($"../../data/{agency}_{mode}/trips.csv", ImportTrips);
+
+                    ImportTry($"../../data/{agency}_{mode}/stop_times.csv", ImportStopTimes);
+
+                    ImportTry($"../../data/{agency}_{mode}/fare_rules.csv", ImportFares);
+
+                    ImportTry($"../../data/{agency}_{mode}/fare_attributes.csv", ImportFareAttributes);
+                }
+
+            }
         }
     }
 }

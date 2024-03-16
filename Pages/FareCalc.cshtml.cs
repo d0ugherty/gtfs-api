@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace GtfsApi.Pages.GtfsEndPoints
+namespace GtfsApi.Pages
 {
-    public class IndexModel : PageModel
+    public class FareCalcModel : PageModel
     {
         public void OnGet()
         {
