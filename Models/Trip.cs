@@ -17,5 +17,5 @@ public class Trip
     
     [ForeignKey("Route")]
     public int RouteId { get; set; }
-    public virtual GtfsRoute GtfsRoute { get; set; }
+    public virtual GtfsRoute Route { get; set; }
 }

@@ -395,13 +395,13 @@ namespace GtfsApi.Migrations
 
             modelBuilder.Entity("GtfsApi.Models.Trip", b =>
                 {
-                    b.HasOne("GtfsApi.Models.GtfsRoute", "GtfsRoute")
+                    b.HasOne("GtfsApi.Models.GtfsRoute", "Route")
                         .WithMany()
                         .HasForeignKey("RouteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("GtfsRoute");
+                    b.Navigation("Route");
                 });
 #pragma warning restore 612, 618
         }

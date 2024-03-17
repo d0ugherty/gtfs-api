@@ -11,7 +11,7 @@ public class GtfsContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Trip>()
-            .HasOne(t => t.GtfsRoute)
+            .HasOne(t => t.Route)
             .WithMany() 
             .HasForeignKey(t => t.RouteId);
     }
