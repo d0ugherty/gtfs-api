@@ -12,10 +12,10 @@ public class Trip
     public string? ShortName { get; set; }
     public string? LongName { get; set; }
     public int ShapeId { get; set; }
-    
+    public string GtfsRouteId { get; set; }
     public int DirectionId { get; set; }
     
     [ForeignKey("Route")]
-    public int RouteId { get; set; }
-    public virtual GtfsRoute Route { get; set; }
+    public int FkRouteId { get; set; }
+    public virtual Route Route { get; set; }
 }

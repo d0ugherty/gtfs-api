@@ -13,11 +13,11 @@ public class GtfsContext : DbContext
         modelBuilder.Entity<Trip>()
             .HasOne(t => t.Route)
             .WithMany() 
-            .HasForeignKey(t => t.RouteId);
+            .HasForeignKey(t => t.FkRouteId);
     }
 
     public DbSet<Agency> Agencies { get; set; } = null!;
-    public DbSet<GtfsRoute> GtfsRoutes { get; set; } = null!;
+    public DbSet<Route> GtfsRoutes { get; set; } = null!;
     public DbSet<Stop> Stops { get; set; } = null!;
     public DbSet<StopTime> StopTimes { get; set; } = null!;
     public DbSet<Calendar> Calendars { get; set; } = null!;

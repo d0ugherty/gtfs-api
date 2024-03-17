@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using GtfsApi.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Route = GtfsApi.Models.Route;
 
 
 namespace GtfsApi.Controllers
@@ -26,10 +28,10 @@ namespace GtfsApi.Controllers
         }
 
         [HttpGet("Routes/{agencyId}")]
-        public async Task<ActionResult<IEnumerable<GtfsRoute>>> GetAgencyRoutes(string agencyId)
+        public async Task<ActionResult<IEnumerable<Route>>> GetAgencyRoutes(string agencyId)
         {
             var routes = await _context.GtfsRoutes
-                .Where(rt => rt.AgencyName.Equals(agencyId.ToUpper()))
+                .Where(rt => rt.GtfsAgencyId.Equals(agencyId.ToUpper()))
                 .ToListAsync();
             
             return routes;
@@ -39,26 +41,49 @@ namespace GtfsApi.Controllers
         public async Task<ActionResult<IEnumerable<Stop>>> GetAgencyStops(string agencyId)
         {
             var routes = await (_context.GtfsRoutes
-                    .Where(rt => rt.AgencyName.Equals(agencyId.ToUpper())))
+                    .Where(rt => rt.GtfsAgencyId.Equals(agencyId.ToUpper())))
                     .ToListAsync();
 
+            foreach (var route in routes)
+            {
+                Console.WriteLine(route.ShortName);
+            }
+            
             var routeIds = routes.Select(route => route.Id).ToList();
-
+            
+            Console.WriteLine($"routeIds empty: {routeIds.IsNullOrEmpty()}");
+                
+            foreach (var id in routeIds)
+            {
+                
+                Console.WriteLine(id);
+                
+            }
+            
             var trips = await (_context.Trips
-                    .Where(trip => routeIds.Contains(trip.RouteId))
-                    .GroupBy(trip => trip.RouteId)
+                    .Where(trip => routeIds.Contains(trip.FkRouteId))
+                    .GroupBy(trip => trip.FkRouteId)
                     .Select(id => id.FirstOrDefault()))
                     .ToListAsync();
-
+            
+            Console.WriteLine($"trips empty: {trips.IsNullOrEmpty()}");
+            
+            foreach (var trip in trips)
+            {
+                Console.WriteLine(trip.TripId);
+            }
+            
             var tripIds = trips.Select(trip => trip!.Id).ToList();
 
             var stopTimes = await (_context.StopTimes
-                    .Where(stopTime => tripIds.Contains(stopTime.TripId))
-                    .GroupBy(stopTime => stopTime.StopId)
+                    .Where(stopTime => tripIds.Contains(stopTime.FkTripId))
+                    .GroupBy(stopTime => stopTime.FkStopId)
                     .Select(stopId => stopId.FirstOrDefault()))
                     .ToListAsync();
-
-            var stopIds = stopTimes.Select(stopTime => stopTime!.StopId).ToList();
+            Console.WriteLine($"stopTimes Empty : {stopTimes.IsNullOrEmpty()}");
+            
+            
+            var stopIds = stopTimes.Select(stopTime => stopTime!.FkStopId).ToList();
 
             var stops = await (_context.Stops
                 .Where(stop => stopIds.Contains(stop.Id))

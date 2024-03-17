@@ -144,8 +144,12 @@ namespace GtfsApi.Migrations
                     b.Property<string>("CurrencyType")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("FareId")
+                    b.Property<int>("FkFareId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("GtfsFareId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("PaymentMethod")
                         .HasColumnType("INTEGER");
@@ -161,28 +165,28 @@ namespace GtfsApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FareId");
+                    b.HasIndex("FkFareId");
 
                     b.ToTable("FareAttributesEnumerable");
                 });
 
-            modelBuilder.Entity("GtfsApi.Models.GtfsRoute", b =>
+            modelBuilder.Entity("GtfsApi.Models.Route", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AgencyId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("AgencyName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Color")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("FkAgencyId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("GtfsAgencyId")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LongName")
@@ -208,7 +212,7 @@ namespace GtfsApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AgencyId");
+                    b.HasIndex("FkAgencyId");
 
                     b.ToTable("GtfsRoutes");
                 });
@@ -287,23 +291,30 @@ namespace GtfsApi.Migrations
                     b.Property<int?>("DropoffType")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("PickupType")
+                    b.Property<int>("FkStopId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("StopId")
+                    b.Property<int>("FkTripId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("GtfsStopId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("GtfsTripId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("PickupType")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("StopSequence")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("TripId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("StopId");
+                    b.HasIndex("FkStopId");
 
-                    b.HasIndex("TripId");
+                    b.HasIndex("FkTripId");
 
                     b.ToTable("StopTimes");
                 });
@@ -321,15 +332,19 @@ namespace GtfsApi.Migrations
                     b.Property<int>("DirectionId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("FkRouteId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("GtfsRouteId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Headsign")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LongName")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("RouteId")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ServiceId")
                         .IsRequired()
@@ -347,7 +362,7 @@ namespace GtfsApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RouteId");
+                    b.HasIndex("FkRouteId");
 
                     b.ToTable("Trips");
                 });
@@ -356,18 +371,18 @@ namespace GtfsApi.Migrations
                 {
                     b.HasOne("GtfsApi.Models.Fare", "Fare")
                         .WithMany()
-                        .HasForeignKey("FareId")
+                        .HasForeignKey("FkFareId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Fare");
                 });
 
-            modelBuilder.Entity("GtfsApi.Models.GtfsRoute", b =>
+            modelBuilder.Entity("GtfsApi.Models.Route", b =>
                 {
                     b.HasOne("GtfsApi.Models.Agency", "Agency")
                         .WithMany()
-                        .HasForeignKey("AgencyId")
+                        .HasForeignKey("FkAgencyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -378,13 +393,13 @@ namespace GtfsApi.Migrations
                 {
                     b.HasOne("GtfsApi.Models.Stop", "Stop")
                         .WithMany()
-                        .HasForeignKey("StopId")
+                        .HasForeignKey("FkStopId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("GtfsApi.Models.Trip", "Trip")
                         .WithMany()
-                        .HasForeignKey("TripId")
+                        .HasForeignKey("FkTripId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -395,9 +410,9 @@ namespace GtfsApi.Migrations
 
             modelBuilder.Entity("GtfsApi.Models.Trip", b =>
                 {
-                    b.HasOne("GtfsApi.Models.GtfsRoute", "Route")
+                    b.HasOne("GtfsApi.Models.Route", "Route")
                         .WithMany()
-                        .HasForeignKey("RouteId")
+                        .HasForeignKey("FkRouteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
