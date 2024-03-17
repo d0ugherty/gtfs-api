@@ -34,8 +34,7 @@ namespace GtfsApi.Controllers
             
             return routes;
         }
-        // Need to finish this. I'll need to get more creative since this is timing out
-        // I think on the trips and stop times.
+        
         [HttpGet("Stops/{agencyId}")]
         public async Task<ActionResult<IEnumerable<object>>> GetAgencyStops(string agencyId)
         {
@@ -68,5 +67,5 @@ namespace GtfsApi.Controllers
             return stops;
         }
     }
-    }
+}
 
