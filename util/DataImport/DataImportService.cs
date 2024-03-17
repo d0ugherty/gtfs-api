@@ -7,6 +7,7 @@ using CsvHelper.Configuration;
 using GtfsApi.Models;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Calendar = GtfsApi.Models.Calendar;
+using Route = GtfsApi.Models.Route;
 
 namespace DataImportUtility
 {
@@ -37,8 +38,8 @@ namespace DataImportUtility
                 {
                     _context.Agencies.Add(new Agency
                     {
-                        AgencyId = record.agency_id,
-                        Name = record.agency_name,
+                        AgencyId = record.agency_id.ToUpper(),
+                        Name = record.agency_name.ToUpper(),
                         Url = record.agency_url,
                         Timezone = record.agency_timezone,
                         Language = record.agency_lang,
@@ -64,11 +65,11 @@ namespace DataImportUtility
                 
                 foreach (var record in records)
                 {
-                    var agencyId = record.agency_id;
-                    var agency = _context.Agencies.SingleOrDefault(a => a.AgencyId == agencyId)
+                    var agencyId = record.agency_id.ToUpper();
+                    var agency = _context.Agencies.SingleOrDefault(a => a.AgencyId.Equals(agencyId))
                                  ?? _context.Agencies.Add(new Agency { AgencyId = agencyId }).Entity;
 
-                    _context.GtfsRoutes.Add(new GtfsRoute
+                    _context.GtfsRoutes.Add(new Route
                     {
                         RouteId = record.route_id,
                         ShortName = record.route_short_name,
@@ -76,9 +77,9 @@ namespace DataImportUtility
                         Color = record.route_color, 
                         TextColor = record.route_text_color,
                         Url = record.route_url,
-                        AgencyName = record.agency_id,
-                        AgencyId = agency.Id,
-                        Agency = agency
+                        GtfsAgencyId = record.agency_id,
+                        Agency = agency,
+                        FkAgencyId = agency.Id
                     });
                 }
 
@@ -222,7 +223,7 @@ namespace DataImportUtility
                 {
                     var tripRouteId = record.route_id;
                     var route = _context.GtfsRoutes.FirstOrDefault(rt => rt.RouteId == tripRouteId)
-                                ?? _context.GtfsRoutes.Add(new GtfsRoute { RouteId = tripRouteId }).Entity;
+                                ?? _context.GtfsRoutes.Add(new Route { RouteId = tripRouteId }).Entity;
                     
                     _context.Trips.Add(new Trip
                     {
@@ -232,8 +233,9 @@ namespace DataImportUtility
                         BlockId = record.block_id,
                         ShortName = record.trip_short_name,
                         DirectionId = record.direction_id,
-                        RouteId = route.Id,
+                        GtfsRouteId = record.route_id,
                         Route = route,
+                        FkRouteId = route.Id,
                         ShapeId = record.shape_id
                     });
                 }
@@ -268,10 +270,12 @@ namespace DataImportUtility
                        StopSequence = record.stop_sequence,
                        PickupType = record.pickup_type,
                        DropoffType = record.drop_off_type,
-                       StopId = stop.Id,
+                       GtfsStopId = record.stop_id,
+                       GtfsTripId = record.trip_id,
                        Stop = stop,
-                       TripId = trip.Id,
-                       Trip = trip
+                       FkStopId = stop.Id,
+                       Trip = trip,
+                       FkTripId = trip.Id,
                     });
                 }
 
@@ -329,15 +333,16 @@ namespace DataImportUtility
                         PaymentMethod = record.payment_method,
                         Transfers = record.transfers,
                         TransferDuration = record.transfer_duration,
-                        FareId = fare.Id,
-                        Fare = fare
+                        GtfsFareId = record.fare_id,
+                        Fare = fare,
+                        FkFareId = fare.Id
                     });
                 }
                 _context.SaveChanges();
             }
         }
 
-        private bool ImportTry(string filePath, Action<string> import)
+        private static bool ImportTry(string filePath, Action<string> import)
         {
             if (File.Exists(filePath))
             {
