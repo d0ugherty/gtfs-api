@@ -29,17 +29,17 @@ namespace GtfsApi.Controllers
         public async Task<ActionResult<IEnumerable<GtfsRoute>>> GetAgencyRoutes(string agencyId)
         {
             var routes = await _context.GtfsRoutes
-                .Where(rt => rt.AgencyName == agencyId.ToUpper())
+                .Where(rt => rt.AgencyName.Equals(agencyId.ToUpper()))
                 .ToListAsync();
             
             return routes;
         }
         
         [HttpGet("Stops/{agencyId}")]
-        public async Task<ActionResult<IEnumerable<object>>> GetAgencyStops(string agencyId)
+        public async Task<ActionResult<IEnumerable<Stop>>> GetAgencyStops(string agencyId)
         {
             var routes = await (_context.GtfsRoutes
-                    .Where(rt => rt.AgencyName == agencyId.ToUpper()))
+                    .Where(rt => rt.AgencyName.Equals(agencyId.ToUpper())))
                     .ToListAsync();
 
             var routeIds = routes.Select(route => route.Id).ToList();
