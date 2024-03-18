@@ -274,9 +274,7 @@ namespace DataImportUtility
                                 FkRouteId = route!.Id,
                                 ShapeId = record.shape_id
                             });
-                                Console.WriteLine($"FOREIGN KEY: {route.Id}");
                         }
-                    
                         _context.SaveChanges();
                         transaction.Commit();
                     }
