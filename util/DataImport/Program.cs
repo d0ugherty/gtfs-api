@@ -14,7 +14,8 @@ namespace DataImportUtility
 		    
 		    
 		    var optionsBuilder = new DbContextOptionsBuilder<GtfsContext>();
-		    optionsBuilder.UseSqlite(connectionString); 
+		    optionsBuilder.UseSqlite(connectionString);
+		    optionsBuilder.EnableSensitiveDataLogging();
 		    var options = optionsBuilder.Options;
 
 		    var importService = new DataImportService(new GtfsContext(options));
