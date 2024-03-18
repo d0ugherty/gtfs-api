@@ -14,7 +14,10 @@ builder.Services.AddControllers();
 builder.Services.AddRazorPages();
 // Database Context
 builder.Services.AddDbContext<GtfsContext>(opt =>
-    opt.UseSqlite(builder.Configuration.GetConnectionString("GtfsApiDatabase") ?? "Data Source = gtfs.db"));
+{
+    opt.UseSqlite(builder.Configuration.GetConnectionString("GtfsApiDatabase") ?? "Data Source = gtfs.db");
+    opt.EnableSensitiveDataLogging();
+});
 
 builder.Services.AddHttpLogging(
     opts => opts.LoggingFields = HttpLoggingFields.RequestProperties);
