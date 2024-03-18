@@ -1,11 +1,9 @@
 using CsvHelper;
-using Microsoft.EntityFrameworkCore;
 using System.Globalization;
-using System.IO;
-using System.Linq;
+using System.Security.Principal;
 using CsvHelper.Configuration;
 using GtfsApi.Models;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore;
 using Calendar = GtfsApi.Models.Calendar;
 using Route = GtfsApi.Models.Route;
 
@@ -33,21 +31,35 @@ namespace DataImportUtility
                 csv.ReadHeader();
                 
                 var records = csv.GetRecords<AgencyCsv>();
-
-                foreach (var record in records)
+                using (var transaction = _context.Database.BeginTransaction())
                 {
-                    _context.Agencies.Add(new Agency
+                    try
                     {
-                        AgencyId = record.agency_id.ToUpper(),
-                        Name = record.agency_name.ToUpper(),
-                        Url = record.agency_url,
-                        Timezone = record.agency_timezone,
-                        Language = record.agency_lang,
-                        Email = record.agency_email
-                    });
-                }
+                        foreach (var record in records)
+                        {
+                            _context.Agencies.Add(new Agency
+                            {
+                                AgencyId = record.agency_id.ToUpper(),
+                                Name = record.agency_name.ToUpper(),
+                                Url = record.agency_url,
+                                Timezone = record.agency_timezone,
+                                Language = record.agency_lang,
+                                Email = record.agency_email
+                            });
+                        }
 
-                _context.SaveChanges();
+                        _context.SaveChanges();
+                        transaction.Commit();
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        transaction.Rollback();
+                        Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                                          $"{filePath} \n " +
+                                          $"{ex}");
+                        throw;
+                    }
+                }
             }
         } 
 
@@ -55,35 +67,49 @@ namespace DataImportUtility
         {
             using (var reader = new StreamReader(filePath))
             using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
-               {
-                   MissingFieldFound = null
-               }))
+                   {
+                       MissingFieldFound = null
+                   }))
             {
                 csv.Read();
                 csv.ReadHeader();
                 var records = csv.GetRecords<RoutesCsv>();
-                
-                foreach (var record in records)
+                using (var transaction = _context.Database.BeginTransaction())
                 {
-                    var agencyId = record.agency_id.ToUpper();
-                    var agency = _context.Agencies.SingleOrDefault(a => a.AgencyId.Equals(agencyId))
-                                 ?? _context.Agencies.Add(new Agency { AgencyId = agencyId }).Entity;
-
-                    _context.GtfsRoutes.Add(new Route
+                    try
                     {
-                        RouteId = record.route_id,
-                        ShortName = record.route_short_name,
-                        LongName = record.route_long_name,
-                        Color = record.route_color, 
-                        TextColor = record.route_text_color,
-                        Url = record.route_url,
-                        GtfsAgencyId = record.agency_id,
-                        Agency = agency,
-                        FkAgencyId = agency.Id
-                    });
-                }
+                        foreach (var record in records)
+                        {
+                            var agencyId = record.agency_id.ToUpper();
+                            var agency = _context.Agencies.SingleOrDefault(a => a.AgencyId.Equals(agencyId)) 
+                                         ?? _context.Agencies.Add(new Agency { AgencyId = agencyId, Name = agencyId }).Entity ;
 
-                _context.SaveChanges();
+                            _context.Routes.Add(new Route
+                            {
+                                RouteId = record.route_id,
+                                ShortName = record.route_short_name,
+                                LongName = record.route_long_name,
+                                Color = record.route_color,
+                                TextColor = record.route_text_color,
+                                Type = record.route_type,
+                                Url = record.route_url,
+                                GtfsAgencyId = record.agency_id,
+                                Agency = agency,
+                                FkAgencyId = agency.Id
+                            });
+                        }
+                        _context.SaveChanges();
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                                          $"{filePath} \n " +
+                                          $"{ex}");
+                        throw;
+                    }
+                }
             }
         }
 
@@ -189,7 +215,6 @@ namespace DataImportUtility
                 var records = csv.GetRecords<ShapesCsv>();
                 csv.Read();
                 csv.ReadHeader();
-                var distTravelledExists = csv.HeaderRecord.Contains("shape_dist_traveled");
 
                 foreach (var record in records)
                 {
@@ -207,7 +232,7 @@ namespace DataImportUtility
             }
         }
         
-        private void ImportTrips(string filePath)
+        private void ImportTrips(string filePath, string agencyId)
         {
             using (var reader = new StreamReader(filePath))
             using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
@@ -218,28 +243,52 @@ namespace DataImportUtility
                 csv.Read();
                 csv.ReadHeader();
                 var records = csv.GetRecords<TripsCsv>();
-
-                foreach (var record in records)
+                using (var transaction = _context.Database.BeginTransaction())
                 {
-                    var tripRouteId = record.route_id;
-                    var route = _context.GtfsRoutes.FirstOrDefault(rt => rt.RouteId == tripRouteId)
-                                ?? _context.GtfsRoutes.Add(new Route { RouteId = tripRouteId }).Entity;
-                    
-                    _context.Trips.Add(new Trip
+                    try
                     {
-                        ServiceId = record.service_id,
-                        TripId = record.trip_id,
-                        Headsign = record.trip_headsign,
-                        BlockId = record.block_id,
-                        ShortName = record.trip_short_name,
-                        DirectionId = record.direction_id,
-                        GtfsRouteId = record.route_id,
-                        Route = route,
-                        FkRouteId = route.Id,
-                        ShapeId = record.shape_id
-                    });
+                        var agency = _context.Agencies.FirstOrDefault(ag => ag.AgencyId.Equals(agencyId.ToUpper()));
+                        foreach (var record in records)
+                        {
+                            var tripRouteId = record.route_id;
+                            var route = _context.Routes.FirstOrDefault(rt =>
+                                            rt.RouteId.Equals(tripRouteId) && rt.Agency.Name.Equals(agency!.Name))
+                                        ?? _context.Routes.Add(new Route
+                                        {
+                                            RouteId = tripRouteId,
+                                            Agency = agency,
+                                            FkAgencyId = agency.Id,
+                                            GtfsAgencyId = agency.AgencyId
+                                        }).Entity;
+
+                            _context.Trips.Add(new Trip
+                            {
+                                ServiceId = record.service_id,
+                                TripId = record.trip_id,
+                                Headsign = record.trip_headsign,
+                                BlockId = record.block_id,
+                                ShortName = record.trip_short_name,
+                                DirectionId = record.direction_id,
+                                GtfsRouteId = record.route_id,
+                                Route = route!,
+                                FkRouteId = route!.Id,
+                                ShapeId = record.shape_id
+                            });
+                                Console.WriteLine($"FOREIGN KEY: {route.Id}");
+                        }
+                    
+                        _context.SaveChanges();
+                        transaction.Commit();
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        transaction.Rollback();
+                        Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                                          $"{filePath} \n " +
+                                          $"{ex}");
+                        throw;
+                    }
                 }
-                _context.SaveChanges();
             }
         }
 
@@ -254,32 +303,44 @@ namespace DataImportUtility
                 csv.Read();
                 csv.ReadHeader();
                 var records = csv.GetRecords<StopTimesCsv>();
-
-                foreach (var record in records)
+                using (var transaction = _context.Database.BeginTransaction())
                 {
-                    var stop = _context.Stops.FirstOrDefault(st => st.StopId == record.stop_id)
-                                ?? _context.Stops.Add(new Stop { StopId = record.stop_id }).Entity;
-
-                    var trip = _context.Trips.FirstOrDefault(tr => tr.TripId == record.trip_id)
-                               ?? _context.Trips.Add(new Trip { TripId = record.trip_id }).Entity;
-                    
-                    _context.StopTimes.Add(new StopTime
+                    try
                     {
-                       ArrivalTime = record.arrival_time,
-                       DepartureTime = record.departure_time,
-                       StopSequence = record.stop_sequence,
-                       PickupType = record.pickup_type,
-                       DropoffType = record.drop_off_type,
-                       GtfsStopId = record.stop_id,
-                       GtfsTripId = record.trip_id,
-                       Stop = stop,
-                       FkStopId = stop.Id,
-                       Trip = trip,
-                       FkTripId = trip.Id,
-                    });
-                }
+                        foreach (var record in records)
+                        {
+                            var stop = _context.Stops.FirstOrDefault(st => st.StopId == record.stop_id);
 
-                _context.SaveChanges();
+                            var trip = _context.Trips.FirstOrDefault(tr => tr.TripId == record.trip_id);
+
+                            _context.StopTimes.Add(new StopTime
+                            {
+                                ArrivalTime = record.arrival_time,
+                                DepartureTime = record.departure_time,
+                                StopSequence = record.stop_sequence,
+                                PickupType = record.pickup_type,
+                                DropoffType = record.drop_off_type,
+                                GtfsStopId = record.stop_id,
+                                GtfsTripId = record.trip_id,
+                                Stop = stop!,
+                                FkStopId = stop!.Id,
+                                Trip = trip!,
+                                FkTripId = trip!.Id,
+                            });
+                        }
+
+                        _context.SaveChanges();
+                        transaction.Commit();
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        transaction.Rollback();
+                        Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                                          $"{filePath} \n " +
+                                          $"{ex}");
+                        throw;
+                    }
+                }
             }
         }
 
@@ -319,30 +380,44 @@ namespace DataImportUtility
                 csv.Read();
                 csv.ReadHeader();
                 var records = csv.GetRecords<FareAttributesCsv>();
-
-                foreach (var record in records)
+                using (var transaction = _context.Database.BeginTransaction())
                 {
-                    var fareId = record.fare_id;
-                    var fare = _context.Fares.SingleOrDefault(f => f.FareId == fareId)
-                               ?? _context.Fares.Add(new Fare { FareId = fareId }).Entity;
-                    
-                    _context.FareAttributesEnumerable.Add(new FareAttributes
+                    try
                     {
-                        Price = record.price,
-                        CurrencyType = record.currency_type,
-                        PaymentMethod = record.payment_method,
-                        Transfers = record.transfers,
-                        TransferDuration = record.transfer_duration,
-                        GtfsFareId = record.fare_id,
-                        Fare = fare,
-                        FkFareId = fare.Id
-                    });
+                        foreach (var record in records)
+                        {
+                            var fareId = record.fare_id;
+                            var fare = _context.Fares.SingleOrDefault(f => f.FareId == fareId)
+                                       ?? _context.Fares.Add(new Fare { FareId = fareId }).Entity;
+
+                            _context.FareAttributesTbl.Add(new FareAttributes
+                            {
+                                Price = record.price,
+                                CurrencyType = record.currency_type,
+                                PaymentMethod = record.payment_method,
+                                Transfers = record.transfers,
+                                TransferDuration = record.transfer_duration,
+                                GtfsFareId = record.fare_id,
+                                Fare = fare,
+                                FkFareId = fare.Id
+                            });
+                        }
+
+                        _context.SaveChanges();
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        transaction.Rollback();
+                        Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                                          $"{filePath} \n " +
+                                          $"{ex}");
+                        throw;
+                    }
                 }
-                _context.SaveChanges();
             }
         }
 
-        private static bool ImportTry(string filePath, Action<string> import)
+        private static void ImportTry(string filePath, Action<string> import)
         {
             if (File.Exists(filePath))
             {
@@ -350,17 +425,16 @@ namespace DataImportUtility
                 {
                     import(filePath);
                     Console.WriteLine($"{filePath} \n successfully imported.");
-                    return true;
                 }
                 catch (ReaderException ex)
                 {
-                    Console.WriteLine($"Reader exception occurred, moving on to next import.");
-                    return false;
+                    Console.WriteLine("Reader exception occurred, moving on to next import.");
                 }
             }
-            
-            Console.WriteLine($"{filePath} does not exist. \n Moving on to next import.");
-            return false;
+            else
+            {
+                Console.WriteLine($"{filePath} does not exist. \n Moving on to next import.");
+            }
         }
         
         public void ImportData()
@@ -381,7 +455,7 @@ namespace DataImportUtility
 
                     ImportTry($"../../data/{agency}_{mode}/shapes.csv", ImportShapes);
 
-                    ImportTry($"../../data/{agency}_{mode}/trips.csv", ImportTrips);
+                    ImportTry($"../../data/{agency}_{mode}/trips.csv", filePath => ImportTrips(filePath, agency));
 
                     ImportTry($"../../data/{agency}_{mode}/stop_times.csv", ImportStopTimes);
 
@@ -393,4 +467,5 @@ namespace DataImportUtility
             }
         }
     }
+
 }
