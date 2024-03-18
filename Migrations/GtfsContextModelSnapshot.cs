@@ -31,7 +31,6 @@ namespace GtfsApi.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Language")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -39,7 +38,6 @@ namespace GtfsApi.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Timezone")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Url")
@@ -167,7 +165,7 @@ namespace GtfsApi.Migrations
 
                     b.HasIndex("FkFareId");
 
-                    b.ToTable("FareAttributesEnumerable");
+                    b.ToTable("FareAttributesTbl");
                 });
 
             modelBuilder.Entity("GtfsApi.Models.Route", b =>
@@ -190,7 +188,6 @@ namespace GtfsApi.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LongName")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("RouteId")
@@ -198,13 +195,12 @@ namespace GtfsApi.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ShortName")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("TextColor")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Type")
+                    b.Property<int?>("Type")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Url")
@@ -214,7 +210,7 @@ namespace GtfsApi.Migrations
 
                     b.HasIndex("FkAgencyId");
 
-                    b.ToTable("GtfsRoutes");
+                    b.ToTable("Routes");
                 });
 
             modelBuilder.Entity("GtfsApi.Models.Shape", b =>

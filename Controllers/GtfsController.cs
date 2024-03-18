@@ -30,7 +30,7 @@ namespace GtfsApi.Controllers
         [HttpGet("Routes/{agencyId}")]
         public async Task<ActionResult<IEnumerable<Route>>> GetAgencyRoutes(string agencyId)
         {
-            var routes = await _context.GtfsRoutes
+            var routes = await _context.Routes
                 .Where(rt => rt.GtfsAgencyId.Equals(agencyId.ToUpper()))
                 .ToListAsync();
             
@@ -40,7 +40,7 @@ namespace GtfsApi.Controllers
         [HttpGet("Stops/{agencyId}")]
         public async Task<ActionResult<IEnumerable<Stop>>> GetAgencyStops(string agencyId)
         {
-            var routes = await (_context.GtfsRoutes
+            var routes = await (_context.Routes
                     .Where(rt => rt.GtfsAgencyId.Equals(agencyId.ToUpper())))
                     .ToListAsync();
 
