@@ -9,8 +9,12 @@ namespace GtfsApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GtfsController(GtfsContext context, IRouteService routeSerivce, IAgencyService agencyService)
+    public class GtfsController(GtfsContext context, 
+        IRouteService routeSerivce, 
+        IAgencyService agencyService,
+        IStopService stopService)
         : ControllerBase
+    
     {
         [HttpGet("Agencies")]
         public async Task<ActionResult<IEnumerable<Agency>>> GetAgencies()
@@ -28,7 +32,7 @@ namespace GtfsApi.Controllers
             return agency;
         }
 
-        [HttpGet("Routes/{agencyId}")]
+        [HttpGet("Routes")]
         public async Task<IActionResult> GetAgencyRoutes(string agencyId)
         {
             var routes =  await routeSerivce.GetAgencyRoutesAsync(agencyId);
@@ -48,7 +52,7 @@ namespace GtfsApi.Controllers
             return Ok(new { Trips = trips });
         }
         
-        [HttpGet("Stops/{agencyId}")]
+        [HttpGet("Stops")]
         public async Task<ActionResult<IEnumerable<Stop>>> GetAgencyStops(string agencyId)
         {
             var routes = await routeSerivce.GetAgencyRoutesAsync(agencyId);
@@ -58,20 +62,10 @@ namespace GtfsApi.Controllers
                 .ToList();
            
             var trips =  await routeSerivce.GetRouteTripsAsync(routeIds);
+
+            var stopIds = await routeSerivce.GetRouteStopIds(trips);
             
-            var tripIds = trips.Select(trip => trip!.Id).ToList();
-
-            var stopTimes = await (context.StopTimes
-                    .Where(stopTime => tripIds.Contains(stopTime.FkTripId))
-                    .GroupBy(stopTime => stopTime.FkStopId)
-                    .Select(stopId => stopId.FirstOrDefault()))
-                    .ToListAsync();
-         
-            var stopIds = stopTimes.Select(stopTime => stopTime!.FkStopId).ToList();
-
-            var stops = await (context.Stops
-                .Where(stop => stopIds.Contains(stop.Id))
-                .Select(stop => stop)).ToListAsync();
+            var stops = await stopService.GetStopsById(stopIds);
             
             return stops;
         }

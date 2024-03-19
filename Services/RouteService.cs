@@ -8,6 +8,7 @@ namespace GtfsApi.Services;
 public class RouteService : IRouteService
 {
     private readonly GtfsContext _context;
+    private IRouteService _routeServiceImplementation;
 
     public RouteService(GtfsContext context)
     {
@@ -55,5 +56,20 @@ public class RouteService : IRouteService
             .ToListAsync();
 
         return trips;
+    }
+
+    public async Task<List<int>> GetRouteStopIds(List<Trip> trips)
+    {
+        var tripIds = trips.Select(trip => trip!.Id).ToList();
+
+        var stopTimes = await _context.StopTimes
+                .Where(stopTime => tripIds.Contains(stopTime.FkTripId))
+                .GroupBy(stopTime => stopTime.FkStopId)
+                .Select(stopId => stopId.FirstOrDefault())
+            .ToListAsync();
+         
+        var stopIds = stopTimes.Select(stopTime => stopTime!.FkStopId).ToList();
+        
+        return stopIds;
     }
 }
