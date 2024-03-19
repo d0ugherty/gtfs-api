@@ -290,7 +290,7 @@ namespace DataImportUtility
             }
         }
 
-        private void ImportStopTimes(string filePath)
+        private void ImportStopTimes(string filePath, string agency)
         {
             using (var reader = new StreamReader(filePath))
             using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
@@ -455,7 +455,7 @@ namespace DataImportUtility
 
                     ImportTry($"../../data/{agency}_{mode}/trips.csv", filePath => ImportTrips(filePath, agency));
 
-                    ImportTry($"../../data/{agency}_{mode}/stop_times.csv", ImportStopTimes);
+                    ImportTry($"../../data/{agency}_{mode}/stop_times.csv", filePath => ImportStopTimes(filePath, agency));
 
                     ImportTry($"../../data/{agency}_{mode}/fare_rules.csv", ImportFares);
 
