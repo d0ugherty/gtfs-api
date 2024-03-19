@@ -8,7 +8,6 @@ namespace GtfsApi.Services;
 public class RouteService : IRouteService
 {
     private readonly GtfsContext _context;
-    private IRouteService _routeServiceImplementation;
 
     public RouteService(GtfsContext context)
     {
@@ -17,30 +16,26 @@ public class RouteService : IRouteService
 
     public async Task<List<Route>> GetAgencyRoutesAsync(string agencyId)
     {
-        List<Route> routes;
-        
-        routes = await _context.Routes
-             .Where(rt => rt.GtfsAgencyId.Equals(agencyId.ToUpper()))
-             .ToListAsync();
+        List<Route> routes = await _context.Routes
+            .Where(rt => rt.GtfsAgencyId.Equals(agencyId.ToUpper()))
+            .ToListAsync();
         
         return routes;
     }
 
     public async Task<Route> GetRouteAsync(string agencyId, string gtfsRouteId)
     {
-       var route = await _context.Routes
-                .Where(rt => rt.GtfsAgencyId.Equals(agencyId.ToUpper())
-                             && rt.RouteId.Equals(gtfsRouteId.ToUpper()))
-                .FirstOrDefaultAsync();
-       
-       return route;
+        var route = await _context.Routes
+            .Where(rt => rt.GtfsAgencyId.Equals(agencyId.ToUpper())
+                         && rt.RouteId.Equals(gtfsRouteId.ToUpper()))
+            .FirstOrDefaultAsync() ?? throw new InvalidOperationException();
+            
+        return route;
     }
 
     public async Task<List<Trip>> GetRouteTripsAsync(int routeId)
     {
-        List<Trip> trips;
-
-        trips = await _context.Trips
+        List<Trip> trips = await _context.Trips
             .Where(trip => routeId == trip.FkRouteId)
             .ToListAsync();
 
@@ -60,16 +55,16 @@ public class RouteService : IRouteService
 
     public async Task<List<int>> GetRouteStopIds(List<Trip> trips)
     {
-        var tripIds = trips.Select(trip => trip!.Id).ToList();
+        List<int> tripIds = trips.Select(trip => trip!.Id).ToList();
 
-        var stopTimes = await _context.StopTimes
-                .Where(stopTime => tripIds.Contains(stopTime.FkTripId))
-                .GroupBy(stopTime => stopTime.FkStopId)
-                .Select(stopId => stopId.FirstOrDefault())
+        List<StopTime?> stopTimes = await _context.StopTimes
+            .Where(stopTime => tripIds.Contains(stopTime.FkTripId))
+            .GroupBy(stopTime => stopTime.FkStopId)
+            .Select(stopId => stopId.FirstOrDefault())
             .ToListAsync();
          
-        var stopIds = stopTimes.Select(stopTime => stopTime!.FkStopId).ToList();
+       List<int> stopIds = stopTimes.Select(stopTime => stopTime!.FkStopId).ToList();
         
-        return stopIds;
+       return stopIds;
     }
 }

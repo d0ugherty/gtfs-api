@@ -4,5 +4,8 @@ namespace GtfsApi.Interfaces;
 
 public interface IStopService
 {
-	public Task<List<Stop>> GetStopsById(List<int> stopIds);
+	public Task<List<Stop>> GetStopListAsync(List<int> stopIds);
+	public Task<Stop> GetStopAsync(int id);
+
+	public Task<List<StopTime>> GetStopTimesAsync(Stop stop);
 }
