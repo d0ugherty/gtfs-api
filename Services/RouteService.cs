@@ -1,7 +1,5 @@
-using System.Diagnostics;
 using GtfsApi.Interfaces;
 using GtfsApi.Models;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Route = GtfsApi.Models.Route;
 
@@ -16,7 +14,7 @@ public class RouteService : IRouteService
         _context = context;
     }
 
-    public async Task<List<Route>> GetAllRoutesAsync(string agencyId)
+    public async Task<List<Route>> GetAgencyRoutesAsync(string agencyId)
     {
         List<Route> routes;
         
@@ -37,13 +35,23 @@ public class RouteService : IRouteService
        return route;
     }
 
-    public async Task<List<Trip>> GetRouteTripsAsync(int routeId, int results)
+    public async Task<List<Trip>> GetRouteTripsAsync(int routeId)
     {
         List<Trip> trips;
 
         trips = await _context.Trips
             .Where(trip => routeId == trip.FkRouteId)
-            .Take(results)
+            .ToListAsync();
+
+        return trips;
+    }
+
+    public async Task<List<Trip>> GetRouteTripsAsync(List<int> routeIds)
+    {
+        List<Trip> trips;
+
+        trips = await _context.Trips
+            .Where(trip => routeIds.Contains(trip.FkRouteId))
             .ToListAsync();
 
         return trips;

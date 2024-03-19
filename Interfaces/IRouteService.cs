@@ -5,7 +5,8 @@ namespace GtfsApi.Interfaces;
 
 public interface IRouteService
 {
-    Task<Route> GetRouteAsync(string agencyId, string routeId);
-    Task<List<Route>> GetAllRoutesAsync(string agencyId);
-    Task<List<Trip>> GetRouteTripsAsync(int routeId, int results);
+    public Task<Route> GetRouteAsync(string agencyId, string routeId);
+    public Task<List<Route>> GetAgencyRoutesAsync(string agencyId);
+    public Task<List<Trip>> GetRouteTripsAsync(int routeId);
+    public Task<List<Trip>> GetRouteTripsAsync(List<int> routeId);
 }

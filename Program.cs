@@ -1,7 +1,9 @@
 using GtfsApi.Migrations;
 using System.Linq.Expressions;
+using GtfsApi.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using GtfsApi.Models;
+using GtfsApi.Services;
 using Microsoft.AspNetCore.HttpLogging;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+builder.Services.AddScoped<IRouteService, RouteService>();
+builder.Services.AddScoped<IAgencyService, AgencyService>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
 builder.Services.AddRazorPages();

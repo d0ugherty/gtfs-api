@@ -3,37 +3,35 @@ using GtfsApi.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using GtfsApi.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using static GtfsApi.Services.RouteService;
-using Route = GtfsApi.Models.Route;
 
 
 namespace GtfsApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GtfsController : ControllerBase
+    public class GtfsController(GtfsContext context, IRouteService routeSerivce, IAgencyService agencyService)
+        : ControllerBase
     {
-        private readonly GtfsContext _context;
-        private readonly IRouteService _routeService;
-
-        public GtfsController(GtfsContext context)
-        {
-            _context = context;
-        }
-
         [HttpGet("Agencies")]
         public async Task<ActionResult<IEnumerable<Agency>>> GetAgencies()
         {
-            var agencies = await _context.Agencies.ToListAsync();
+            var agencies = await agencyService.GetAllAgencies();
             
             return agencies;
+        }
+
+        [HttpGet("{agencyId}")]
+        public async Task<ActionResult<Agency>> GetAgencyByGtfsId(string agencyId)
+        {
+            var agency = await agencyService.GetAgencyByGtfsId(agencyId);
+            
+            return agency;
         }
 
         [HttpGet("Routes/{agencyId}")]
         public async Task<IActionResult> GetAgencyRoutes(string agencyId)
         {
-            var routes = _routeService.GetAllRoutesAsync(agencyId);
+            var routes =  await routeSerivce.GetAgencyRoutesAsync(agencyId);
             
             return Ok(new {Routes = routes});
         }
@@ -41,11 +39,11 @@ namespace GtfsApi.Controllers
         [HttpGet("Trips")]
         public async Task<ActionResult<IEnumerable<Trip>>> GetAgencyTrips(string agencyId, string gtfsRouteId, int results=10)
         {
-            var route = _routeService.GetRouteAsync(agencyId, gtfsRouteId);
+            var route = await routeSerivce.GetRouteAsync(agencyId, gtfsRouteId);
 
             var routeId = route.Id;
 
-            var trips = _routeService.GetRouteTripsAsync(routeId, results);
+            var trips = await routeSerivce.GetRouteTripsAsync(routeId);
 
             return Ok(new { Trips = trips });
         }
@@ -53,31 +51,25 @@ namespace GtfsApi.Controllers
         [HttpGet("Stops/{agencyId}")]
         public async Task<ActionResult<IEnumerable<Stop>>> GetAgencyStops(string agencyId)
         {
-            var routes = _routeService.GetAllRoutesAsync(agencyId);
+            var routes = await routeSerivce.GetAgencyRoutesAsync(agencyId);
             
             var routeIds = routes
-                .Where()
                 .Select(route => route.Id)
                 .ToList();
            
-            var trips = await (_context.Trips
-                    .Where(trip => routeIds.Contains(trip.FkRouteId)))
-                    .ToListAsync();
+            var trips =  await routeSerivce.GetRouteTripsAsync(routeIds);
             
             var tripIds = trips.Select(trip => trip!.Id).ToList();
 
-            var stopTimes = await (_context.StopTimes
+            var stopTimes = await (context.StopTimes
                     .Where(stopTime => tripIds.Contains(stopTime.FkTripId))
                     .GroupBy(stopTime => stopTime.FkStopId)
                     .Select(stopId => stopId.FirstOrDefault()))
                     .ToListAsync();
-            foreach (var stopTime in stopTimes)
-            {
-                Console.WriteLine(stopTime.Stop);
-            }
+         
             var stopIds = stopTimes.Select(stopTime => stopTime!.FkStopId).ToList();
 
-            var stops = await (_context.Stops
+            var stops = await (context.Stops
                 .Where(stop => stopIds.Contains(stop.Id))
                 .Select(stop => stop)).ToListAsync();
             
