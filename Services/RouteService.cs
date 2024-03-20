@@ -55,7 +55,7 @@ public class RouteService : IRouteService
 
     public async Task<List<int>> GetRouteStopIds(List<Trip> trips)
     {
-        List<int> tripIds = trips.Select(trip => trip!.Id).ToList();
+        List<int> tripIds = trips.Select(trip => trip.Id).ToList();
 
         List<StopTime?> stopTimes = await _context.StopTimes
             .Where(stopTime => tripIds.Contains(stopTime.FkTripId))
