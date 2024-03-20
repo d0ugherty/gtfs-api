@@ -400,8 +400,9 @@ namespace DataImportUtility
                                 FkFareId = fare.Id
                             });
                         }
-
+                        
                         _context.SaveChanges();
+                        transaction.Commit();
                     }
                     catch (InvalidOperationException ex)
                     {
