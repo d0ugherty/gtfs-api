@@ -13,7 +13,8 @@ namespace GtfsApi.Controllers
     public class GtfsController(GtfsContext context, 
         IRouteService routeSerivce, 
         IAgencyService agencyService,
-        IStopService stopService)
+        IStopService stopService,
+        IFareService fareService)
         : ControllerBase
     
     {
@@ -71,7 +72,7 @@ namespace GtfsApi.Controllers
             return Ok(new { Stops = stops });
         }
 
-        [HttpGet("StopTimes/{id}")]
+        [HttpGet("StopTimes")]
         public async Task<ActionResult<IEnumerable<StopTime>>> GetStopTimes(int id)
         {
             Stop stop = await stopService.GetStopAsync(id);
@@ -81,6 +82,23 @@ namespace GtfsApi.Controllers
             return Ok(new { StopTimes = stopTimes });
         }
         
+        [HttpGet("Fare")]
+        public async Task<ActionResult<Fare>> GetFare(string origin, string destination)
+        {
+            Fare fare = await fareService.GetFare(origin, destination);
+
+            return Ok(new { Fare = fare });
+        }
+
+        [HttpGet("FarePrice")]
+        public async Task<ActionResult<float>> GetFarePrice(string origin, string destination)
+        {
+            Fare fare = await fareService.GetFare(origin, destination);
+
+            float price = await fareService.GetFarePrice(fare);
+
+            return Ok(new { Price = price });
+        }
         
     }
 }
