@@ -168,6 +168,45 @@ namespace GtfsApi.Migrations
                     b.ToTable("FareAttributesTbl");
                 });
 
+            modelBuilder.Entity("GtfsApi.Models.FeedInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FeedEndDate")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FeedLanguage")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FeedPublisherName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FeedPublisherUrl")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FeedStartDate")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FeedVersion")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("FkAgencyId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FkAgencyId");
+
+                    b.ToTable("FeedInfoTbl");
+                });
+
             modelBuilder.Entity("GtfsApi.Models.Route", b =>
                 {
                     b.Property<int>("Id")
@@ -278,10 +317,12 @@ namespace GtfsApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("ArrivalTime")
+                    b.Property<string>("ArrivalTime")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("DepartureTime")
+                    b.Property<string>("DepartureTime")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("DropoffType")
@@ -372,6 +413,17 @@ namespace GtfsApi.Migrations
                         .IsRequired();
 
                     b.Navigation("Fare");
+                });
+
+            modelBuilder.Entity("GtfsApi.Models.FeedInfo", b =>
+                {
+                    b.HasOne("GtfsApi.Models.Agency", "Agency")
+                        .WithMany()
+                        .HasForeignKey("FkAgencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Agency");
                 });
 
             modelBuilder.Entity("GtfsApi.Models.Route", b =>

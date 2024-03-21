@@ -7,12 +7,9 @@ namespace GtfsApi.Models;
 public class StopTime
 {
     public int Id { get; set; }
-    
-    [DataType(DataType.Time)]
-    public DateTime ArrivalTime { get; set; }
-    
-    [DataType(DataType.Time)]
-    public DateTime DepartureTime { get; set; }
+
+    public string ArrivalTime { get; set; } = null!;
+    public string DepartureTime { get; set; } = null!;
     
     public int StopSequence { get; set; }
     public int? PickupType { get; set; }

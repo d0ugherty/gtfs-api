@@ -411,6 +411,58 @@ namespace DataImportUtility
             }
         }
 
+        private void ImportFeedInfo(string filePath)
+        {
+            using (var reader = new StreamReader(filePath))
+            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+                   {
+                       MissingFieldFound = null
+                   }))
+            {
+                csv.Read();
+                csv.ReadHeader();
+
+                var records = csv.GetRecords<FeedInfoCsv>();
+
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        foreach (var record in records)
+                        {
+                            string publisherName = record.feed_publisher_name.Trim();
+
+                            Agency agency = context.Agencies.FirstOrDefault(a => a.Name.Equals(publisherName))
+                                            ?? context.Agencies.First(a => a.AgencyId.Equals(publisherName));
+
+                            context.FeedInfoTbl.Add(new FeedInfo
+                            {
+                                FeedPublisherName = publisherName,
+                                FeedPublisherUrl = record.feed_publisher_url,
+                                FeedLanguage = record.feed_lang,
+                                FeedStartDate = record.feed_start_date,
+                                FeedEndDate = record.feed_end_date,
+                                FeedVersion = record.feed_version,
+                                FkAgencyId = agency.Id,
+                                Agency = agency
+                            });
+
+                            context.SaveChanges();
+                            transaction.Commit();
+                        }
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        transaction.Rollback();
+                        Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                                          $"{filePath} \n " +
+                                          $"{ex}");
+                        throw;
+                    }
+                }
+            }
+        }
+
         private static void ImportTry(string filePath, Action<string> import)
         {
             if (File.Exists(filePath))
@@ -456,6 +508,8 @@ namespace DataImportUtility
                     ImportTry($"../../data/{agency}_{mode}/fare_rules.csv", ImportFares);
 
                     ImportTry($"../../data/{agency}_{mode}/fare_attributes.csv", ImportFareAttributes);
+                    
+                    ImportTry($"../../data/{agency}_{mode}/feed_info.csv", ImportFeedInfo);
                 }
 
             }

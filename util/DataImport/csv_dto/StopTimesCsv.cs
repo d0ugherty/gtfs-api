@@ -7,10 +7,10 @@ public class StopTimesCsv
 	public string trip_id { get; set; } = null!;
 	
 	[DataType(DataType.Time)]
-	public DateTime arrival_time { get; set; }
+	public string arrival_time { get; set; }
     
 	[DataType(DataType.Time)]
-	public DateTime departure_time { get; set; }
+	public string departure_time { get; set; }
 	
 	public int stop_id { get; set; }
 	public int stop_sequence { get; set; }
