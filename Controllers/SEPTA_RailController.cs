@@ -8,12 +8,12 @@ namespace GtfsApi.Controllers
 {
     [Route("api/septa")]
     [ApiController]
-    public class SEPTAController: BaseAgencyController
+    public class SEPTA_RailController: BaseAgencyController
     {
         private readonly IFareService _fareService;
         protected override string AgencyId => "SEPTA";
 
-        public SEPTAController( IRouteService routeService, IAgencyService agencyService, IStopService stopService, IFareService fareService) 
+        public SEPTA_RailController( IRouteService routeService, IAgencyService agencyService, IStopService stopService, IFareService fareService) 
             : base(agencyService, routeService, stopService)
         {
             _fareService = fareService;

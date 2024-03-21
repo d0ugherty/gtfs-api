@@ -5,11 +5,11 @@ namespace GtfsApi.Controllers;
 
 	[Route("api/njt")]
 	[ApiController]
-	public class NJTController: BaseAgencyController
+	public class NJT_BusController: BaseAgencyController
 	{
 		protected override string AgencyId => "NJT";
 
-		public NJTController(IRouteService routeService, IAgencyService agencyService, IStopService stopService) 
+		public NJT_BusController(IRouteService routeService, IAgencyService agencyService, IStopService stopService) 
 			: base(agencyService, routeService, stopService)
 		{
 			
