@@ -4,7 +4,7 @@ namespace DataImportUtility;
 
 public class StopTimesCsv
 {
-	public string trip_id { get; set; }
+	public string trip_id { get; set; } = null!;
 	
 	[DataType(DataType.Time)]
 	public DateTime arrival_time { get; set; }

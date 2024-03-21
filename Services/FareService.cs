@@ -28,19 +28,26 @@ public class FareService : IFareService
 		string originZone = await _context.Stops
 			.Where(stop => stop.Name.Equals(origin))
 			.Select(stop => stop.ZoneId).FirstOrDefaultAsync() ?? throw new InvalidOperationException();
+
+		originZone = originZone.Trim();
 		
-		Console.WriteLine($"origin: {originZone}");
+		Console.WriteLine($"origin:____{originZone}_--");
 		
 		string destinationZone = await _context.Stops
 			.Where(stop => stop.Name.Equals(destination))
 			.Select(stop => stop.ZoneId).FirstOrDefaultAsync() ?? throw new InvalidOperationException();
+
+		Console.WriteLine($"dest: ___{destinationZone}");
 		
-		Console.WriteLine($"destination: {destinationZone}");
+		var  test = _context.Fares.FirstOrDefault(fare => fare.Id == 1);
 		
-		Fare fare = await _context.Fares
-			.Where(fare => fare.OriginId == originZone && fare.DestinationId == destinationZone)
-			.Select(fare => fare)
-			.SingleOrDefaultAsync() ?? throw new InvalidOperationException();
+		Console.WriteLine($"Test value ____{test.OriginId}____");
+		Console.WriteLine($"TEST DEST:---{test.DestinationId}---");
+
+		var fare = await _context.Fares
+			.FirstOrDefaultAsync(fare => fare.OriginId.Equals(originZone) && fare.DestinationId.Equals(destinationZone));
+
+		Console.WriteLine($"fare = {fare}");
 
 		return fare;
 	}

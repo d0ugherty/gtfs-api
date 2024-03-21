@@ -5,7 +5,7 @@ namespace GtfsApi.Models;
 public class Route
 {
     public int Id { get; set; }
-    public string RouteId { get; set; }
+    public string RouteId { get; set; } = null!;
     public string? ShortName { get; set; }
     public string? LongName { get; set; }
     public string? Description { get; set; }
@@ -13,11 +13,11 @@ public class Route
     public string? Color { get; set; }
     public string? TextColor { get; set; }
     public string? Url { get; set; }
-    public string GtfsAgencyId { get; set; }
+    public string GtfsAgencyId { get; set; } = null!;
     
     
     [ForeignKey("Agency")]
     public int FkAgencyId { get; set; }
-    public virtual Agency Agency { get; set; }
+    public virtual Agency Agency { get; set; } = null!;
     
 }

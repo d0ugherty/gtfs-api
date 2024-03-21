@@ -10,8 +10,8 @@ namespace DataImportUtility
 {
     public class DataImportService(GtfsContext context)
     {
-        private readonly List<string> agencies = ["septa", "njt"];
-        private readonly List<string> modes = ["rail", "bus"];
+        private readonly List<string> _agencies = ["septa", "njt"];
+        private readonly List<string> _modes = ["rail", "bus"];
 
         private void ImportAgency(string filePath)
         {
@@ -189,7 +189,7 @@ namespace DataImportUtility
                         Description = record.stop_desc,
                         Latitude = record.stop_lat,
                         Longitude = record.stop_lon,
-                        ZoneId = record.zone_id,
+                        ZoneId = record.zone_id?.Trim(),
                         Url = record.stop_url
                     });
                 }
@@ -251,7 +251,7 @@ namespace DataImportUtility
                                         ?? context.Routes.Add(new Route
                                         {
                                             RouteId = tripRouteId,
-                                            Agency = agency,
+                                            Agency = agency ?? throw new InvalidOperationException(),
                                             FkAgencyId = agency.Id,
                                             GtfsAgencyId = agency.AgencyId
                                         }).Entity;
@@ -265,8 +265,8 @@ namespace DataImportUtility
                                 ShortName = record.trip_short_name,
                                 DirectionId = record.direction_id,
                                 GtfsRouteId = record.route_id,
-                                Route = route!,
-                                FkRouteId = route!.Id,
+                                Route = route,
+                                FkRouteId = route.Id,
                                 ShapeId = record.shape_id
                             });
                         }
@@ -285,7 +285,7 @@ namespace DataImportUtility
             }
         }
 
-        private void ImportStopTimes(string filePath, string agency)
+        private void ImportStopTimes(string filePath)
         {
             using (var reader = new StreamReader(filePath))
             using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
@@ -354,8 +354,8 @@ namespace DataImportUtility
                     context.Fares.Add(new Fare
                     {
                        FareId = record.fare_id,
-                       OriginId = record.origin_id,
-                       DestinationId = record.destination_id
+                       OriginId = record.origin_id.Trim(),
+                       DestinationId = record.destination_id.Trim()
                     });
                 }
                 context.SaveChanges();
@@ -433,9 +433,9 @@ namespace DataImportUtility
         
         public void ImportData()
         {
-            foreach (var agency in agencies)
+            foreach (var agency in _agencies)
             {
-                foreach (var mode in modes)
+                foreach (var mode in _modes)
                 {
                     ImportTry($"../../data/{agency}_{mode}/agency.csv", ImportAgency);
 
@@ -451,7 +451,7 @@ namespace DataImportUtility
 
                     ImportTry($"../../data/{agency}_{mode}/trips.csv", filePath => ImportTrips(filePath, agency));
 
-                    ImportTry($"../../data/{agency}_{mode}/stop_times.csv", filePath => ImportStopTimes(filePath, agency));
+                    ImportTry($"../../data/{agency}_{mode}/stop_times.csv", ImportStopTimes);
 
                     ImportTry($"../../data/{agency}_{mode}/fare_rules.csv", ImportFares);
 

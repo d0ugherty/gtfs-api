@@ -17,7 +17,7 @@ public class StopTime
     public int StopSequence { get; set; }
     public int? PickupType { get; set; }
     public int? DropoffType { get; set; }
-    public string GtfsTripId { get; set; }
+    public string GtfsTripId { get; set; } = null!;
     public int GtfsStopId { get; set; }
     
     [ForeignKey("Stop")]
