@@ -1,5 +1,3 @@
-using GtfsApi.Migrations;
-using System.Linq.Expressions;
 using GtfsApi.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using GtfsApi.Models;
@@ -16,7 +14,6 @@ builder.Services.AddScoped<IRouteService, RouteService>();
 builder.Services.AddScoped<IAgencyService, AgencyService>();
 builder.Services.AddScoped<IStopService, StopService>();
 builder.Services.AddScoped<IFareService, FareService>();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
 builder.Services.AddRazorPages();
 // Database Context
@@ -34,6 +31,7 @@ builder.Logging.AddFilter(
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.WebHost.UseStaticWebAssets();
 
 var app = builder.Build();
