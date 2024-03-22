@@ -1,12 +1,20 @@
+using GtfsApi.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GtfsApi.Controllers;
 
-public class NJT_RailController : Controller
+[Route("api/nj-transit-rail")]
+[ApiController]
+public class NJT_RailController: BaseAgencyController
 {
-	// GET
-	public IActionResult Index()
-	{
-		return View();
-	}
+    protected override string AgencyId => "NJT";
+
+    public NJT_RailController(
+        IRouteService routeService, 
+        IAgencyService agencyService, 
+        IStopService stopService) 
+        : base(agencyService, routeService, stopService)
+    {
+			
+    }
 }

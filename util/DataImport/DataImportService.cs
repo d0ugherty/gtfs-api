@@ -243,18 +243,26 @@ namespace DataImportUtility
                     try
                     {
                         var agency = context.Agencies.FirstOrDefault(ag => ag.AgencyId.Equals(agencyId.ToUpper()));
+                        if (agency == null) throw new InvalidOperationException("Agency not found.");
+                        
+                        var routesDictionary = context.Routes
+                            .Where(rt => rt.FkAgencyId == agency.Id)
+                            .ToDictionary(rt => rt.RouteId, rt => rt);
+
                         foreach (var record in records)
                         {
-                            var tripRouteId = record.route_id;
-                            var route = context.Routes.FirstOrDefault(rt =>
-                                            rt.RouteId.Equals(tripRouteId) && rt.Agency.Name.Equals(agency!.Name))
-                                        ?? context.Routes.Add(new Route
-                                        {
-                                            RouteId = tripRouteId,
-                                            Agency = agency ?? throw new InvalidOperationException(),
-                                            FkAgencyId = agency.Id,
-                                            GtfsAgencyId = agency.AgencyId
-                                        }).Entity;
+                            if (!routesDictionary.TryGetValue(record.route_id, out var route))
+                            {
+                                route = context.Routes.Add(new Route
+                                {
+                                    RouteId = record.route_id,
+                                    Agency = agency,
+                                    FkAgencyId = agency.Id,
+                                    GtfsAgencyId = agency.AgencyId
+                                }).Entity;
+                              
+                                routesDictionary[record.route_id] = route;
+                            }
 
                             context.Trips.Add(new Trip
                             {
@@ -285,7 +293,11 @@ namespace DataImportUtility
             }
         }
 
-        private void ImportStopTimes(string filePath)
+        /**
+         *  TO DO: Optimize this.
+         *
+         */
+        private void ImportStopTimes(string filePath, string agencyName, string mode)
         {
             using (var reader = new StreamReader(filePath))
             using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
@@ -293,6 +305,7 @@ namespace DataImportUtility
                        MissingFieldFound = null
                    }))
             {
+                
                 csv.Read();
                 csv.ReadHeader();
                 var records = csv.GetRecords<StopTimesCsv>();
@@ -463,6 +476,95 @@ namespace DataImportUtility
             }
         }
 
+        private void ImportTransfers(string filePath, string agency, string mode)
+        {
+            using (var reader = new StreamReader(filePath))
+            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+                   {
+                       MissingFieldFound = null
+                   }))
+            {
+                csv.Read();
+                csv.ReadHeader();
+
+                var agencyId = agency;
+                
+                if (agency.Equals("septa") && mode.Equals("bus"))
+                {
+                    agencyId = "1";
+                }
+                
+                List<Route> routes = context.Routes
+                    .Where(rt => rt.GtfsAgencyId.Equals(agencyId.ToUpper()))
+                    .ToList();
+                
+                List<int> routeIds = routes
+                    .Select(route => route.Id)
+                    .ToList();
+                
+                List<Trip> trips = context.Trips
+                    .Where(trip => routeIds.Contains(trip.FkRouteId))
+                    .ToList();
+                
+                List<int> tripIds = trips.Select(trip => trip.Id).ToList();
+
+                List<StopTime?> stopTimes = context.StopTimes
+                    .Where(stopTime => tripIds.Contains(stopTime.FkTripId))
+                    .GroupBy(stopTime => stopTime.FkStopId)
+                    .Select(stopId => stopId.FirstOrDefault())
+                    .ToList();
+                
+                List<int> agencyStopIds = stopTimes.Select(stopTime => stopTime!.FkStopId).ToList();
+                
+                List<Stop> stops = context.Stops
+                    .Where(stop => agencyStopIds.Contains(stop.Id))
+                    .Select(stop => stop)
+                    .ToList();
+
+                foreach (var stop in stops)
+                {
+                    Console.WriteLine(stop.StopId);
+                }
+
+                var records = csv.GetRecords<TransfersCsv>();
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        foreach (var record in records)
+                        {
+                            int fromStopId = record.from_stop_id;
+                            int toStopId = record.to_stop_id;
+
+                            Stop fromStop = stops.First(stop => stop.StopId == fromStopId);
+
+                            Stop toStop = stops.First(stop => stop.StopId == toStopId);
+
+                            context.Transfers.Add(new Transfer
+                            {
+                                FromStopId = fromStopId,
+                                ToStopId = toStopId,
+                                TransferType = record.transfer_type,
+                                MinTransferTime = record.min_transfer_time,
+                                FromStop = fromStop,
+                                FkFromStopId = fromStop.Id,
+                                ToStop = toStop,
+                                FkToStopId = toStop.Id
+                            });
+                        }
+
+                        context.SaveChanges();
+                        transaction.Commit();
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        transaction.Rollback();
+                        Console.WriteLine(ex);
+                    }
+                }
+            }
+        }
+
         private static void ImportTry(string filePath, Action<string> import)
         {
             if (File.Exists(filePath))
@@ -501,15 +603,19 @@ namespace DataImportUtility
 
                     ImportTry($"../../data/{agency}_{mode}/shapes.csv", ImportShapes);
 
-                    ImportTry($"../../data/{agency}_{mode}/trips.csv", filePath => ImportTrips(filePath, agency));
+                    ImportTry($"../../data/{agency}_{mode}/trips.csv", 
+                        filePath => ImportTrips(filePath, agency));
 
-                    ImportTry($"../../data/{agency}_{mode}/stop_times.csv", ImportStopTimes);
+                    ImportTry($"../../data/{agency}_{mode}/stop_times.csv", filePath => ImportStopTimes(filePath, agency, mode));
 
                     ImportTry($"../../data/{agency}_{mode}/fare_rules.csv", ImportFares);
 
                     ImportTry($"../../data/{agency}_{mode}/fare_attributes.csv", ImportFareAttributes);
                     
                     ImportTry($"../../data/{agency}_{mode}/feed_info.csv", ImportFeedInfo);
+
+                    ImportTry($"../../data/{agency}_{mode}/transfers.csv",
+                        filePath => ImportTransfers(filePath, agency, mode));
                 }
 
             }

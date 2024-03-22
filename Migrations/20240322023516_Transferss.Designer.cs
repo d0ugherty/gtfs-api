@@ -3,6 +3,7 @@ using System;
 using GtfsApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GtfsApi.Migrations
 {
     [DbContext(typeof(GtfsContext))]
-    partial class GtfsContextModelSnapshot : ModelSnapshot
+    [Migration("20240322023516_Transferss")]
+    partial class Transferss
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.2");
@@ -356,39 +359,6 @@ namespace GtfsApi.Migrations
                     b.ToTable("StopTimes");
                 });
 
-            modelBuilder.Entity("GtfsApi.Models.Transfer", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("FkFromStopId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("FkToStopId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("FromStopId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("MinTransferTime")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ToStopId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("TransferType")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FromStopId");
-
-                    b.HasIndex("ToStopId");
-
-                    b.ToTable("Transfers");
-                });
-
             modelBuilder.Entity("GtfsApi.Models.Trip", b =>
                 {
                     b.Property<int>("Id")
@@ -487,25 +457,6 @@ namespace GtfsApi.Migrations
                     b.Navigation("Stop");
 
                     b.Navigation("Trip");
-                });
-
-            modelBuilder.Entity("GtfsApi.Models.Transfer", b =>
-                {
-                    b.HasOne("GtfsApi.Models.Stop", "FromStop")
-                        .WithMany()
-                        .HasForeignKey("FromStopId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GtfsApi.Models.Stop", "ToStop")
-                        .WithMany()
-                        .HasForeignKey("ToStopId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("FromStop");
-
-                    b.Navigation("ToStop");
                 });
 
             modelBuilder.Entity("GtfsApi.Models.Trip", b =>

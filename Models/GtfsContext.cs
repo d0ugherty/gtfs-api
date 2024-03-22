@@ -27,5 +27,6 @@ public class GtfsContext : DbContext
     public DbSet<Shape> Shapes { get; set; } = null!;
     public DbSet<Trip> Trips { get; set; } = null!;
     public DbSet<FeedInfo> FeedInfoTbl { get; set; } = null!;
+    public DbSet<Transfer> Transfers { get; set; } = null!;
 
 }
