@@ -2,12 +2,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GtfsApi.Models;
 
-public class GtfsContext : DbContext
+public class GtfsContext(DbContextOptions<GtfsContext> options) : DbContext(options)
 {
-    public GtfsContext(DbContextOptions<GtfsContext> options) : base(options)
-    {
-        // Configuration handled by base(options)
-    }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Trip>()
@@ -28,5 +25,6 @@ public class GtfsContext : DbContext
     public DbSet<Trip> Trips { get; set; } = null!;
     public DbSet<FeedInfo> FeedInfoTbl { get; set; } = null!;
     public DbSet<Transfer> Transfers { get; set; } = null!;
+    public DbSet<Mode> Modes { get; set; } = null!;
 
 }

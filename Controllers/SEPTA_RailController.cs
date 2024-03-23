@@ -8,28 +8,20 @@ namespace GtfsApi.Controllers
 {
     [Route("api/septa-rail")]
     [ApiController]
-    public class SEPTA_RailController: BaseAgencyController
+    public class SEPTA_RailController(
+        IRouteService routeService,
+        IAgencyService agencyService,
+        IStopService stopService,
+        IFareService fareService,
+        IFeedInfoService feedInfoService)
+        : BaseAgencyController(agencyService, routeService, stopService)
     {
-        private readonly IFareService _fareService;
-        private readonly IFeedInfoService _feedInfoService;
         protected override string AgencyId => "SEPTA";
 
-        public SEPTA_RailController(
-            IRouteService routeService, 
-            IAgencyService agencyService, 
-            IStopService stopService, 
-            IFareService fareService,
-            IFeedInfoService feedInfoService) 
-            : base(agencyService, routeService, stopService)
-        {
-            _fareService = fareService;
-            _feedInfoService = feedInfoService;
-        }
-        
         [HttpGet("Fare")]
         public async Task<ActionResult<Fare>> GetFare(string origin, string destination)
         {
-            Fare fare = await _fareService.GetFare(origin, destination);
+            Fare fare = await fareService.GetFare(origin, destination);
 
             return Ok(new { Fare = fare });
         }
@@ -37,9 +29,9 @@ namespace GtfsApi.Controllers
         [HttpGet("FarePrice")]
         public async Task<ActionResult<float>> GetFarePrice(string origin, string destination)
         {
-            Fare fare = await _fareService.GetFare(origin, destination);
+            Fare fare = await fareService.GetFare(origin, destination);
 
-            float price = await _fareService.GetFarePrice(fare);
+            float price = await fareService.GetFarePrice(fare);
 
             return Ok(new { Price = price });
         }
@@ -47,7 +39,7 @@ namespace GtfsApi.Controllers
         [HttpGet("RssFeedInfo")]
         public async Task<ActionResult<List<FeedInfo>>> GetFeedInformation()
         {
-            var feedInfo = await _feedInfoService.GetFeedInfo(AgencyId);
+            var feedInfo = await feedInfoService.GetFeedInfo(AgencyId);
             
             return Ok(new { FeedInfo = feedInfo });
         }

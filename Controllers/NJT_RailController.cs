@@ -5,16 +5,11 @@ namespace GtfsApi.Controllers;
 
 [Route("api/nj-transit-rail")]
 [ApiController]
-public class NJT_RailController: BaseAgencyController
+public class NJT_RailController(
+    IRouteService routeService,
+    IAgencyService agencyService,
+    IStopService stopService)
+    : BaseAgencyController(agencyService, routeService, stopService)
 {
     protected override string AgencyId => "NJT";
-
-    public NJT_RailController(
-        IRouteService routeService, 
-        IAgencyService agencyService, 
-        IStopService stopService) 
-        : base(agencyService, routeService, stopService)
-    {
-			
-    }
 }

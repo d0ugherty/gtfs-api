@@ -30,6 +30,9 @@ namespace GtfsApi.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("FkModeId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Language")
                         .HasColumnType("TEXT");
 
@@ -44,6 +47,8 @@ namespace GtfsApi.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FkModeId");
 
                     b.ToTable("Agencies");
                 });
@@ -207,6 +212,21 @@ namespace GtfsApi.Migrations
                     b.ToTable("FeedInfoTbl");
                 });
 
+            modelBuilder.Entity("GtfsApi.Models.Mode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Modes");
+                });
+
             modelBuilder.Entity("GtfsApi.Models.Route", b =>
                 {
                     b.Property<int>("Id")
@@ -284,8 +304,14 @@ namespace GtfsApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("AgencyName")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("FkAgencyId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<float>("Latitude")
                         .HasColumnType("REAL");
@@ -307,6 +333,8 @@ namespace GtfsApi.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FkAgencyId");
 
                     b.ToTable("Stops");
                 });
@@ -437,6 +465,17 @@ namespace GtfsApi.Migrations
                     b.ToTable("Trips");
                 });
 
+            modelBuilder.Entity("GtfsApi.Models.Agency", b =>
+                {
+                    b.HasOne("GtfsApi.Models.Mode", "Mode")
+                        .WithMany()
+                        .HasForeignKey("FkModeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Mode");
+                });
+
             modelBuilder.Entity("GtfsApi.Models.FareAttributes", b =>
                 {
                     b.HasOne("GtfsApi.Models.Fare", "Fare")
@@ -460,6 +499,17 @@ namespace GtfsApi.Migrations
                 });
 
             modelBuilder.Entity("GtfsApi.Models.Route", b =>
+                {
+                    b.HasOne("GtfsApi.Models.Agency", "Agency")
+                        .WithMany()
+                        .HasForeignKey("FkAgencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Agency");
+                });
+
+            modelBuilder.Entity("GtfsApi.Models.Stop", b =>
                 {
                     b.HasOne("GtfsApi.Models.Agency", "Agency")
                         .WithMany()

@@ -11,7 +11,7 @@ public class FeedInfoService(GtfsContext context) : IFeedInfoService
 		var agencyFeedInfo = await context.FeedInfoTbl
 			.FromSqlRaw("SELECT * " +
 			            "FROM FeedInfoTbl AS fi " +
-			            "JOIN Agency a ON a.Id = fi.FkAgencyId" +
+			            "JOIN Agencies a ON a.Id = fi.FkAgencyId" +
 			            "WHERE a.Name = {0} OR a.AgencyId = {0}", agencyId)
 			.ToListAsync();
 

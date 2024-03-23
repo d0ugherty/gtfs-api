@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace GtfsApi.Models;
 
 public class Agency
@@ -9,4 +11,9 @@ public class Agency
     public string? Timezone { get; set; } = null!;
     public string? Language { get; set; } = null!;
     public string? Email { get; set; } = null!;
+    
+    [ForeignKey("Mode")]
+    public int FkModeId { get; set; }
+
+    public Mode Mode { get; set; } = null!;
 }

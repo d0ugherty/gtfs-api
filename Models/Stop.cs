@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace GtfsApi.Models;
 
 public class Stop
@@ -10,4 +12,11 @@ public class Stop
     public float Longitude { get; set; }
     public string? ZoneId { get; set; }
     public string? Url { get; set; }
+    public string? AgencyName { get; set; }
+    
+    [ForeignKey("Agency")]
+    public int FkAgencyId { get; set; }
+
+    public Agency Agency { get; set; } = null!;
+
 }
