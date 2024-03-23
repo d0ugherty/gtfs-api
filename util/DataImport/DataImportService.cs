@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using CsvHelper;
 using System.Globalization;
 using CsvHelper.Configuration;
@@ -200,6 +201,7 @@ namespace DataImportUtility
 
                         foreach (var record in records)
                         {
+                            Debug.Assert(agency != null, nameof(agency) + " != null");
                             context.Stops.Add(new Stop
                             {
                                 StopId = record.stop_id,
@@ -369,6 +371,7 @@ namespace DataImportUtility
                             stopsDictionary.TryGetValue(record.stop_id, out var stop);
                             tripsDictionary.TryGetValue(record.trip_id, out var trip);
 
+                            
                             context.StopTimes.Add(new StopTime
                             {
                                 ArrivalTime = record.arrival_time,
@@ -378,9 +381,9 @@ namespace DataImportUtility
                                 DropoffType = record.drop_off_type,
                                 GtfsStopId = record.stop_id,
                                 GtfsTripId = record.trip_id,
-                                Stop = stop,
+                                Stop = stop ?? throw new InvalidOperationException(),
                                 FkStopId = stop.Id,
-                                Trip = trip,
+                                Trip = trip ?? throw new InvalidOperationException(),
                                 FkTripId = trip.Id,
                             });
                         }
@@ -474,7 +477,7 @@ namespace DataImportUtility
             }
         }
 
-        private void ImportFeedInfo(string filePath)
+        private void ImportFeedInfo(string filePath, string agencyId, string mode)
         {
             using (var reader = new StreamReader(filePath))
             using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
@@ -487,6 +490,11 @@ namespace DataImportUtility
 
                 var records = csv.GetRecords<FeedInfoCsv>();
 
+                if (agencyId.Equals("septa") && mode.Equals("bus"))
+                {
+                    agencyId = "1";
+                }
+
                 using (var transaction = context.Database.BeginTransaction())
                 {
                     try
@@ -495,8 +503,7 @@ namespace DataImportUtility
                         {
                             string publisherName = record.feed_publisher_name.Trim();
 
-                            Agency agency = context.Agencies.FirstOrDefault(a => a.Name.Equals(publisherName))
-                                            ?? context.Agencies.First(a => a.AgencyId.Equals(publisherName));
+                            Agency agency = context.Agencies.First(a => a.AgencyId.Equals(agencyId.ToUpper()));
 
                             context.FeedInfoTbl.Add(new FeedInfo
                             {
@@ -607,14 +614,13 @@ namespace DataImportUtility
             }
         }
         
-        public void ImportData()
+        public void ImportData(string data="all")
         {
             foreach (var agency in _agencies)
             {
                 foreach (var mode in _modes)
                 {
-                    ImportTry($"../../data/{agency}_{mode}/agency.csv", 
-                        filePath => ImportAgency(filePath, mode));
+                    ImportTry($"../../data/{agency}_{mode}/agency.csv", filePath => ImportAgency(filePath, mode));
 
                     ImportTry($"../../data/{agency}_{mode}/routes.csv", ImportRoutes);
 
@@ -622,14 +628,11 @@ namespace DataImportUtility
 
                     ImportTry($"../../data/{agency}_{mode}/calendar_dates.csv", ImportCalendarDates);
 
-                    ImportTry($"../../data/{agency}_{mode}/stops.csv", 
-                        filePath => ImportStops(filePath, agency, mode));
+                    ImportTry($"../../data/{agency}_{mode}/stops.csv", filePath => ImportStops(filePath, agency, mode));
 
-                    ImportTry($"../../data/{agency}_{mode}/trips.csv", 
-                        filePath => ImportTrips(filePath, agency, mode));
+                    ImportTry($"../../data/{agency}_{mode}/trips.csv", filePath => ImportTrips(filePath, agency, mode));
 
-                    ImportTry($"../../data/{agency}_{mode}/stop_times.csv", 
-                        filePath => ImportStopTimes(filePath, agency, mode));
+                    ImportTry($"../../data/{agency}_{mode}/stop_times.csv", filePath => ImportStopTimes(filePath, agency, mode));
 
                     ImportTry($"../../data/{agency}_{mode}/shapes.csv", ImportShapes);
                     
@@ -637,14 +640,11 @@ namespace DataImportUtility
 
                     ImportTry($"../../data/{agency}_{mode}/fare_attributes.csv", ImportFareAttributes);
                     
-                    ImportTry($"../../data/{agency}_{mode}/feed_info.csv", ImportFeedInfo);
+                    ImportTry($"../../data/{agency}_{mode}/feed_info.csv", filePath => ImportFeedInfo(filePath, agency, mode));
 
-                    ImportTry($"../../data/{agency}_{mode}/transfers.csv",
-                        filePath => ImportTransfers(filePath, agency, mode));
+                    ImportTry($"../../data/{agency}_{mode}/transfers.csv", filePath => ImportTransfers(filePath, agency, mode));
                 }
-
             }
         }
     }
-
 }
