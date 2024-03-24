@@ -11,7 +11,7 @@ namespace DataImportUtility
 {
     public class DataImportService(GtfsContext context)
     {
-        private readonly List<string> _agencies = ["septa", "njt", "njb"];
+        private readonly List<string> _agencies = ["Amtrak", "NJ Transit", "SEPTA"];
         private readonly List<string> _modes = ["rail", "bus"];
 
         private void ImportAgency(string filePath, string mode)
@@ -30,7 +30,6 @@ namespace DataImportUtility
                 {
                     try
                     {
-                        Mode agencyMode = context.Modes.SingleOrDefault(m => m.Type.Equals(mode)) ?? throw new InvalidOperationException();
                         
                         foreach (var record in records)
                         {
@@ -42,8 +41,8 @@ namespace DataImportUtility
                                 Timezone = record.agency_timezone,
                                 Language = record.agency_lang,
                                 Email = record.agency_email,
-                                Mode = agencyMode,
-                                FkModeId = agencyMode.Id
+                              //  Mode = agencyMode,
+                               // FkModeId = agencyMode.Id
                             });
                         }
 
@@ -95,7 +94,7 @@ namespace DataImportUtility
                                 Url = record.route_url,
                                 GtfsAgencyId = record.agency_id,
                                 Agency = agency,
-                                FkAgencyId = agency.Id
+                                Fk_agencyId = agency.Id
                             });
                         }
                         context.SaveChanges();
@@ -197,7 +196,7 @@ namespace DataImportUtility
                     try
                     {
                         var agency = context.Agencies.FirstOrDefault(ag =>
-                            ag.AgencyId.Equals(agencyId.ToUpper()) && ag.Mode.Type.Equals(mode));
+                            ag.AgencyId.Equals(agencyId.ToUpper()));
 
                         foreach (var record in records)
                         {
@@ -211,7 +210,7 @@ namespace DataImportUtility
                                 Longitude = record.stop_lon,
                                 ZoneId = record.zone_id?.Trim(),
                                 Url = record.stop_url,
-                                FkAgencyId = agency.Id,
+                                Fk_agencyId = agency.Id,
                                 AgencyName = agency.Name,
                                 Agency = agency
                             });
@@ -283,7 +282,7 @@ namespace DataImportUtility
                         if (agency == null) throw new InvalidOperationException("Agency not found.");
                         
                         var routesDictionary = context.Routes
-                            .Where(rt => rt.FkAgencyId == agency.Id)
+                            .Where(rt => rt.Fk_agencyId == agency.Id)
                             .ToDictionary(rt => rt.RouteId, rt => rt);
 
                         foreach (var record in records)
@@ -294,7 +293,7 @@ namespace DataImportUtility
                                 {
                                     RouteId = record.route_id,
                                     Agency = agency,
-                                    FkAgencyId = agency.Id,
+                                    Fk_agencyId = agency.Id,
                                     GtfsAgencyId = agency.AgencyId
                                 }).Entity;
                               
@@ -311,7 +310,7 @@ namespace DataImportUtility
                                 DirectionId = record.direction_id,
                                 GtfsRouteId = record.route_id,
                                 Route = route,
-                                FkRouteId = route.Id,
+                                Fk_routeId = route.Id,
                                 ShapeId = record.shape_id
                             });
                         }
@@ -379,12 +378,12 @@ namespace DataImportUtility
                                 StopSequence = record.stop_sequence,
                                 PickupType = record.pickup_type,
                                 DropoffType = record.drop_off_type,
-                                GtfsStopId = record.stop_id,
-                                GtfsTripId = record.trip_id,
+                                StopId = record.stop_id,
+                                TripId = record.trip_id,
                                 Stop = stop ?? throw new InvalidOperationException(),
-                                FkStopId = stop.Id,
+                                Fk_stopId = stop.Id,
                                 Trip = trip ?? throw new InvalidOperationException(),
-                                FkTripId = trip.Id,
+                                Fk_tripId = trip.Id,
                             });
                         }
 
@@ -458,7 +457,7 @@ namespace DataImportUtility
                                 TransferDuration = record.transfer_duration,
                                 GtfsFareId = record.fare_id,
                                 Fare = fare,
-                                FkFareId = fare.Id
+                                Fk_fareId = fare.Id
                             });
                         }
                         
@@ -479,57 +478,53 @@ namespace DataImportUtility
 
         private void ImportFeedInfo(string filePath, string agencyId, string mode)
         {
-            using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
-                   {
-                       MissingFieldFound = null
-                   }))
+            using var reader = new StreamReader(filePath);
+            using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
             {
-                csv.Read();
-                csv.ReadHeader();
+                MissingFieldFound = null
+            });
+            csv.Read();
+            csv.ReadHeader();
 
-                var records = csv.GetRecords<FeedInfoCsv>();
+            var records = csv.GetRecords<FeedInfoCsv>();
 
-                if (agencyId.Equals("septa") && mode.Equals("bus"))
+            if (agencyId.Equals("septa") && mode.Equals("bus"))
+            {
+                agencyId = "1";
+            }
+
+            using var transaction = context.Database.BeginTransaction();
+            try
+            {
+                foreach (var record in records)
                 {
-                    agencyId = "1";
-                }
+                    string publisherName = record.feed_publisher_name.Trim();
 
-                using (var transaction = context.Database.BeginTransaction())
-                {
-                    try
+                    Agency agency = context.Agencies.First(a => a.AgencyId.Equals(agencyId.ToUpper()));
+
+                    context.FeedInfoTbl.Add(new FeedInfo
                     {
-                        foreach (var record in records)
-                        {
-                            string publisherName = record.feed_publisher_name.Trim();
+                        FeedPublisherName = publisherName,
+                        FeedPublisherUrl = record.feed_publisher_url,
+                        FeedLanguage = record.feed_lang,
+                        FeedStartDate = record.feed_start_date,
+                        FeedEndDate = record.feed_end_date,
+                        FeedVersion = record.feed_version,
+                        Fk_agencyId = agency.Id,
+                        Agency = agency
+                    });
 
-                            Agency agency = context.Agencies.First(a => a.AgencyId.Equals(agencyId.ToUpper()));
-
-                            context.FeedInfoTbl.Add(new FeedInfo
-                            {
-                                FeedPublisherName = publisherName,
-                                FeedPublisherUrl = record.feed_publisher_url,
-                                FeedLanguage = record.feed_lang,
-                                FeedStartDate = record.feed_start_date,
-                                FeedEndDate = record.feed_end_date,
-                                FeedVersion = record.feed_version,
-                                FkAgencyId = agency.Id,
-                                Agency = agency
-                            });
-
-                            context.SaveChanges();
-                            transaction.Commit();
-                        }
-                    }
-                    catch (InvalidOperationException ex)
-                    {
-                        transaction.Rollback();
-                        Console.WriteLine($"Invalid operation occurred during importing of \n " +
-                                          $"{filePath} \n " +
-                                          $"{ex}");
-                        throw;
-                    }
+                    context.SaveChanges();
+                    transaction.Commit();
                 }
+            }
+            catch (InvalidOperationException ex)
+            {
+                transaction.Rollback();
+                Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                                  $"{filePath} \n " +
+                                  $"{ex}");
+                throw;
             }
         }
 
@@ -561,8 +556,8 @@ namespace DataImportUtility
                     {
                         foreach (var record in records)
                         {
-                            int fromStopId = record.from_stop_id;
-                            int toStopId = record.to_stop_id;
+                            string fromStopId = record.from_stop_id;
+                            string toStopId = record.to_stop_id;
 
                             Stop fromStop = stops.First(stop => stop.StopId == fromStopId);
 
@@ -575,9 +570,9 @@ namespace DataImportUtility
                                 TransferType = record.transfer_type,
                                 MinTransferTime = record.min_transfer_time,
                                 FromStop = fromStop,
-                                FkFromStopId = fromStop.Id,
+                                Fk_fromStopId = fromStop.Id,
                                 ToStop = toStop,
-                                FkToStopId = toStop.Id
+                                Fk_toStopId = toStop.Id
                             });
                         }
 
@@ -593,7 +588,7 @@ namespace DataImportUtility
             }
         }
 
-        private static void ImportTry(string filePath, Action<string> import)
+        private void ImportTry(string filePath, Action<string> import)
         {
             if (File.Exists(filePath))
             {
@@ -613,7 +608,6 @@ namespace DataImportUtility
                 Console.WriteLine($"{filePath} does not exist. \n Moving on to next import.");
             }
         }
-        
         public void ImportData(string data="all")
         {
             foreach (var agency in _agencies)

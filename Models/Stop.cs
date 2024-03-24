@@ -5,7 +5,7 @@ namespace GtfsApi.Models;
 public class Stop
 {
     public int Id { get; set; }
-    public int StopId { get; set; }
+    public string StopId { get; set; } = null!;
     public string Name { get; set; } = null!;
     public string? Description { get; set; }
     public float Latitude { get; set; }
@@ -15,7 +15,7 @@ public class Stop
     public string? AgencyName { get; set; }
     
     [ForeignKey("Agency")]
-    public int FkAgencyId { get; set; }
+    public int Fk_agencyId { get; set; }
 
     public Agency Agency { get; set; } = null!;
 

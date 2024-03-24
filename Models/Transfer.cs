@@ -5,18 +5,18 @@ namespace GtfsApi.Models;
 public class Transfer
 {
 	public int Id { get; set; }
-	public int FromStopId { get; set; }
-	public int ToStopId { get; set; }
+	public string FromStopId { get; set; } = null!;
+	public string ToStopId { get; set; } = null!;
 	public int? TransferType { get; set; }
 	public int? MinTransferTime { get; set; }
 
-	[ForeignKey("Stop")] 
-	public int FkFromStopId { get; set; }
+	[ForeignKey("FromStop")] 
+	public int Fk_fromStopId { get; set; }
 
 	public Stop FromStop { get; set; } = null!;
 
-	[ForeignKey("Stop")] 
-	public int FkToStopId { get; set; }
+	[ForeignKey("ToStop")] 
+	public int Fk_toStopId { get; set; }
 
 	public Stop ToStop { get; set; } = null!;
 }

@@ -16,6 +16,6 @@ public class FareAttributes
     public string GtfsFareId { get; set; } = null!;
 
     [ForeignKey("Fare")] 
-    public int FkFareId { get; set; }
+    public int Fk_fareId { get; set; }
     public virtual Fare Fare { get; set; } = null!;
 }

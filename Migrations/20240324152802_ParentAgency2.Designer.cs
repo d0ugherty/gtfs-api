@@ -3,6 +3,7 @@ using System;
 using GtfsApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GtfsApi.Migrations
 {
     [DbContext(typeof(GtfsContext))]
-    partial class GtfsContextModelSnapshot : ModelSnapshot
+    [Migration("20240324152802_ParentAgency2")]
+    partial class ParentAgency2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.2");
@@ -30,7 +33,7 @@ namespace GtfsApi.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Fk_parentAgencyId")
+                    b.Property<int>("FkParentAgencyId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Language")
@@ -48,7 +51,7 @@ namespace GtfsApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Fk_parentAgencyId");
+                    b.HasIndex("FkParentAgencyId");
 
                     b.ToTable("Agencies");
                 });
@@ -147,7 +150,7 @@ namespace GtfsApi.Migrations
                     b.Property<string>("CurrencyType")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Fk_fareId")
+                    b.Property<int>("FkFareId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("GtfsFareId")
@@ -168,7 +171,7 @@ namespace GtfsApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Fk_fareId");
+                    b.HasIndex("FkFareId");
 
                     b.ToTable("FareAttributesTbl");
                 });
@@ -202,12 +205,12 @@ namespace GtfsApi.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Fk_agencyId")
+                    b.Property<int>("FkAgencyId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Fk_agencyId");
+                    b.HasIndex("FkAgencyId");
 
                     b.ToTable("FeedInfoTbl");
                 });
@@ -254,7 +257,7 @@ namespace GtfsApi.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Fk_agencyId")
+                    b.Property<int>("FkAgencyId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("GtfsAgencyId")
@@ -282,7 +285,7 @@ namespace GtfsApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Fk_agencyId");
+                    b.HasIndex("FkAgencyId");
 
                     b.ToTable("Routes");
                 });
@@ -325,7 +328,7 @@ namespace GtfsApi.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Fk_agencyId")
+                    b.Property<int>("FkAgencyId")
                         .HasColumnType("INTEGER");
 
                     b.Property<float>("Latitude")
@@ -350,7 +353,7 @@ namespace GtfsApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Fk_agencyId");
+                    b.HasIndex("FkAgencyId");
 
                     b.ToTable("Stops");
                 });
@@ -372,31 +375,31 @@ namespace GtfsApi.Migrations
                     b.Property<int?>("DropoffType")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Fk_stopId")
+                    b.Property<int>("FkStopId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Fk_tripId")
+                    b.Property<int>("FkTripId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("GtfsStopId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("GtfsTripId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("PickupType")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("StopId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("StopSequence")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("TripId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("Fk_stopId");
+                    b.HasIndex("FkStopId");
 
-                    b.HasIndex("Fk_tripId");
+                    b.HasIndex("FkTripId");
 
                     b.ToTable("StopTimes");
                 });
@@ -407,15 +410,18 @@ namespace GtfsApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Fk_fromStopId")
+                    b.Property<int>("FkFromStopId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Fk_toStopId")
+                    b.Property<int>("FkToStopId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("FromStopId")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("FromStopId1")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("MinTransferTime")
                         .HasColumnType("INTEGER");
@@ -424,14 +430,17 @@ namespace GtfsApi.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("ToStopId1")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int?>("TransferType")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Fk_fromStopId");
+                    b.HasIndex("FromStopId1");
 
-                    b.HasIndex("Fk_toStopId");
+                    b.HasIndex("ToStopId1");
 
                     b.ToTable("Transfers");
                 });
@@ -449,7 +458,7 @@ namespace GtfsApi.Migrations
                     b.Property<int>("DirectionId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Fk_routeId")
+                    b.Property<int>("FkRouteId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("GtfsRouteId")
@@ -479,7 +488,7 @@ namespace GtfsApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Fk_routeId");
+                    b.HasIndex("FkRouteId");
 
                     b.ToTable("Trips");
                 });
@@ -488,7 +497,7 @@ namespace GtfsApi.Migrations
                 {
                     b.HasOne("GtfsApi.Models.ParentAgency", "ParentAgency")
                         .WithMany()
-                        .HasForeignKey("Fk_parentAgencyId")
+                        .HasForeignKey("FkParentAgencyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -499,7 +508,7 @@ namespace GtfsApi.Migrations
                 {
                     b.HasOne("GtfsApi.Models.Fare", "Fare")
                         .WithMany()
-                        .HasForeignKey("Fk_fareId")
+                        .HasForeignKey("FkFareId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -510,7 +519,7 @@ namespace GtfsApi.Migrations
                 {
                     b.HasOne("GtfsApi.Models.Agency", "Agency")
                         .WithMany()
-                        .HasForeignKey("Fk_agencyId")
+                        .HasForeignKey("FkAgencyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -521,7 +530,7 @@ namespace GtfsApi.Migrations
                 {
                     b.HasOne("GtfsApi.Models.Agency", "Agency")
                         .WithMany()
-                        .HasForeignKey("Fk_agencyId")
+                        .HasForeignKey("FkAgencyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -532,7 +541,7 @@ namespace GtfsApi.Migrations
                 {
                     b.HasOne("GtfsApi.Models.Agency", "Agency")
                         .WithMany()
-                        .HasForeignKey("Fk_agencyId")
+                        .HasForeignKey("FkAgencyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -543,13 +552,13 @@ namespace GtfsApi.Migrations
                 {
                     b.HasOne("GtfsApi.Models.Stop", "Stop")
                         .WithMany()
-                        .HasForeignKey("Fk_stopId")
+                        .HasForeignKey("FkStopId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("GtfsApi.Models.Trip", "Trip")
                         .WithMany()
-                        .HasForeignKey("Fk_tripId")
+                        .HasForeignKey("FkTripId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -562,13 +571,13 @@ namespace GtfsApi.Migrations
                 {
                     b.HasOne("GtfsApi.Models.Stop", "FromStop")
                         .WithMany()
-                        .HasForeignKey("Fk_fromStopId")
+                        .HasForeignKey("FromStopId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("GtfsApi.Models.Stop", "ToStop")
                         .WithMany()
-                        .HasForeignKey("Fk_toStopId")
+                        .HasForeignKey("ToStopId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -581,7 +590,7 @@ namespace GtfsApi.Migrations
                 {
                     b.HasOne("GtfsApi.Models.Route", "Route")
                         .WithMany()
-                        .HasForeignKey("Fk_routeId")
+                        .HasForeignKey("FkRouteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

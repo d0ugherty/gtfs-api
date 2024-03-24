@@ -13,6 +13,6 @@ public class FeedInfo
 	public string FeedVersion { get; set; } = null!;
 	
 	[ForeignKey("Agency")]
-	public int FkAgencyId { get; set; }
+	public int Fk_agencyId { get; set; }
 	public Agency Agency { get; set; } = null!;
 }

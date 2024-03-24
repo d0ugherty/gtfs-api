@@ -47,7 +47,7 @@ public class FareService : IFareService
 	public async Task<float> GetFarePrice(Fare fare)
 	{
 		float price = await _context.FareAttributesTbl
-			.Where(fa => fa.FkFareId == fare.Id)
+			.Where(fa => fa.Fk_fareId == fare.Id)
 			.Select(fa => fa.Price).SingleAsync();
 
 		return price;
@@ -56,7 +56,7 @@ public class FareService : IFareService
 	public async Task<FareAttributes> GetFareAttributes(Fare fare)
 	{
 		FareAttributes attributes = await _context.FareAttributesTbl
-			.Where(fa => fa.FkFareId == fare.Id)
+			.Where(fa => fa.Fk_fareId == fare.Id)
 			.Select(fa => fa)
 			.SingleAsync();
 

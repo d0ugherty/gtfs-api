@@ -12,8 +12,13 @@ public class Agency
     public string? Language { get; set; } = null!;
     public string? Email { get; set; } = null!;
     
-    [ForeignKey("Mode")]
-    public int FkModeId { get; set; }
+    [ForeignKey("ParentAgency")]
+    public int Fk_parentAgencyId { get; set; }
 
-    public Mode Mode { get; set; } = null!;
+    public ParentAgency ParentAgency { get; set; } = null!;
+
+    //[ForeignKey("Mode")]
+    //public int FkModeId { get; set; }
+
+    // public Mode Mode { get; set; } = null!;
 }

@@ -10,7 +10,32 @@ public class GtfsContext(DbContextOptions<GtfsContext> options) : DbContext(opti
         modelBuilder.Entity<Trip>()
             .HasOne(t => t.Route)
             .WithMany() 
-            .HasForeignKey(t => t.FkRouteId);
+            .HasForeignKey(t => t.Fk_routeId);
+
+        modelBuilder.Entity<Transfer>()
+            .HasOne(tr => tr.FromStop)
+            .WithMany()
+            .HasForeignKey(tr => tr.Fk_fromStopId);
+        
+        modelBuilder.Entity<Transfer>()
+            .HasOne(tr => tr.ToStop)
+            .WithMany()
+            .HasForeignKey(tr => tr.Fk_toStopId);
+
+        modelBuilder.Entity<StopTime>()
+            .HasOne(st => st.Stop)
+            .WithMany()
+            .HasForeignKey(st => st.Fk_stopId);
+
+        modelBuilder.Entity<StopTime>()
+            .HasOne(st => st.Trip)
+            .WithMany()
+            .HasForeignKey(st => st.Fk_tripId);
+
+        modelBuilder.Entity<Agency>()
+            .HasOne(a => a.ParentAgency)
+            .WithMany()
+            .HasForeignKey(a => a.Fk_parentAgencyId);
     }
 
     public DbSet<Agency> Agencies { get; set; } = null!;
@@ -26,5 +51,5 @@ public class GtfsContext(DbContextOptions<GtfsContext> options) : DbContext(opti
     public DbSet<FeedInfo> FeedInfoTbl { get; set; } = null!;
     public DbSet<Transfer> Transfers { get; set; } = null!;
     public DbSet<Mode> Modes { get; set; } = null!;
-
+    public DbSet<ParentAgency> ParentAgencies { get; set; } = null!;
 }

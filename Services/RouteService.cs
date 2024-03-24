@@ -36,7 +36,7 @@ public class RouteService : IRouteService
     public async Task<List<Trip>> GetRouteTripsAsync(int routeId)
     {
         List<Trip> trips = await _context.Trips
-            .Where(trip => routeId == trip.FkRouteId)
+            .Where(trip => routeId == trip.Fk_routeId)
             .ToListAsync();
 
         return trips;
@@ -47,7 +47,7 @@ public class RouteService : IRouteService
         List<Trip> trips;
 
         trips = await _context.Trips
-            .Where(trip => routeIds.Contains(trip.FkRouteId))
+            .Where(trip => routeIds.Contains(trip.Fk_routeId))
             .ToListAsync();
 
         return trips;
@@ -58,12 +58,12 @@ public class RouteService : IRouteService
         List<int> tripIds = trips.Select(trip => trip.Id).ToList();
 
         List<StopTime?> stopTimes = await _context.StopTimes
-            .Where(stopTime => tripIds.Contains(stopTime.FkTripId))
-            .GroupBy(stopTime => stopTime.FkStopId)
+            .Where(stopTime => tripIds.Contains(stopTime.Fk_tripId))
+            .GroupBy(stopTime => stopTime.Fk_stopId)
             .Select(stopId => stopId.FirstOrDefault())
             .ToListAsync();
          
-       List<int> stopIds = stopTimes.Select(stopTime => stopTime!.FkStopId).ToList();
+       List<int> stopIds = stopTimes.Select(stopTime => stopTime!.Fk_stopId).ToList();
         
        return stopIds;
     }

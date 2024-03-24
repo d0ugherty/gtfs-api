@@ -17,7 +17,7 @@ public class Route
     
     
     [ForeignKey("Agency")]
-    public int FkAgencyId { get; set; }
+    public int Fk_agencyId { get; set; }
     public virtual Agency Agency { get; set; } = null!;
     
 }
