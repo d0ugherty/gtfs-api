@@ -1,6 +1,8 @@
 using GtfsApi.Interfaces;
 using GtfsApi.Migrations;
 using Microsoft.AspNetCore.Mvc;
+using GtfsApi.Models;
+using Route = GtfsApi.Models.Route;
 
 namespace GtfsApi.Controllers;
 
@@ -10,17 +12,24 @@ public class AmtrakController(
     IRouteService routeService,
     IAgencyService agencyService,
     IStopService stopService,
-    IFeedInfoService feedInfoService) : BaseAgencyController(agencyService, routeService, stopService)
+    IFeedInfoService feedInfoService) : BaseAgencyController(agencyService, routeService, stopService, feedInfoService)
 {
     protected override string AgencyId => "Amtrak";
     protected override string ParentAgency => "Amtrak";
-
     
-    [HttpGet("RssFeedInfo")]
-    public async Task<ActionResult<List<FeedInfo>>> GetFeedInformation()
+    [HttpGet("routes/rail")]
+    public async Task<IActionResult> GetAgencyRoutes()
     {
-        var feedInfo = await feedInfoService.GetFeedInfo(AgencyId);
+        List<Route> routes =  await RouteService.GetRoutesByTypeAsync(AgencyId, 2);
             
-        return Ok(new { FeedInfo = feedInfo });
+        return Ok(new { Routes = routes });
+    }
+        
+    [HttpGet("routes/bus")]
+    public async Task<IActionResult> GetAgencyRailRoutes()
+    {
+        List<Route> routes =  await RouteService.GetRoutesByTypeAsync(AgencyId, 3);
+            
+        return Ok(new { Routes = routes });
     }
 }

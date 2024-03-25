@@ -68,9 +68,6 @@ public class RouteService : IRouteService
 
     public async Task<List<Stop>> GetRouteStops(string agencyId, string routeId)
     {
-        Route route = await _context.Routes
-            .FirstAsync(rt => rt.RouteId.Equals(routeId) && rt.Agency.AgencyId.Equals(agencyId));
-
         List<Stop> stops = await _context.Stops
             .FromSqlRaw("SELECT s.* " +
                         "FROM Stops as s " +
@@ -81,5 +78,14 @@ public class RouteService : IRouteService
                         ).ToListAsync();
 
         return stops;
+    }
+
+    public async Task<List<Route>> GetRoutesByTypeAsync(string agencyId, int routeType)
+    {
+        List<Route> routes = await _context.Routes
+            .Where(rt => rt.GtfsAgencyId.Equals(agencyId) && rt.Type == routeType)
+            .ToListAsync();
+
+        return routes;
     }
 }

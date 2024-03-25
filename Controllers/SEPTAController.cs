@@ -15,18 +15,10 @@ namespace GtfsApi.Controllers
         IStopService stopService,
         IFareService fareService,
         IFeedInfoService feedInfoService)
-        : BaseAgencyController(agencyService, routeService, stopService)
+        : BaseAgencyController(agencyService, routeService, stopService, feedInfoService)
     {
         protected override string AgencyId => "SEPTA";
         protected override string ParentAgency => "SEPTA";
-
-        [HttpGet("RssFeedInfo")]
-        public async Task<ActionResult<List<FeedInfo>>> GetFeedInformation()
-        {
-            var feedInfo = await feedInfoService.GetFeedInfo(AgencyId);
-            
-            return Ok(new { FeedInfo = feedInfo });
-        }
         
         [HttpGet("regional-rail/Fare")]
         public async Task<ActionResult<Fare>> GetFare(string origin, string destination)
@@ -46,26 +38,29 @@ namespace GtfsApi.Controllers
             return Ok(new { Price = price });
         }
         
-        [HttpGet("Routes/rail")]
+        [HttpGet("routes/rail")]
         public async Task<IActionResult> GetAgencyRoutes()
         {
-            List<Route> routes =  await _routeService.GetAgencyRoutesAsync(AgencyId);
-
-            List<Route> railRoutes = routes.Where(rt => rt.Type == 2)
-                .Select(rt => rt)
-                .ToList();
-            
-            return Ok(new { Routes = railRoutes });
-        }
-        
-        [HttpGet("Routes/bus")]
-        public async Task<IActionResult> GetAgencyRailRoutes()
-        {
-            List<Route> routes =  await _routeService.GetAgencyRoutesAsync(AgencyId);
+            List<Route> routes =  await RouteService.GetRoutesByTypeAsync(AgencyId, 2);
             
             return Ok(new { Routes = routes });
-        }  
+        }
         
+        [HttpGet("routes/bus")]
+        public async Task<IActionResult> GetAgencyRailRoutes()
+        {
+            List<Route> routes =  await RouteService.GetRoutesByTypeAsync(AgencyId, 3);
+            
+            return Ok(new { Routes = routes });
+        }
+    
+        [HttpGet("routes/light-rail")]
+        public async Task<IActionResult> GetAgencyLightRailRoutes()
+        {
+            List<Route> routes =  await RouteService.GetRoutesByTypeAsync(AgencyId, 0);
+            
+            return Ok(new { Routes = routes });
+        }
     }
 }
 
