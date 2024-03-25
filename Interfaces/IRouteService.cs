@@ -7,7 +7,7 @@ public interface IRouteService
 {
     public Task<Route> GetRouteAsync(string agencyId, string routeId);
 
-    public Task<List<Route>> GetAgencyRoutesAsync(string agencyId);
+    public Task<List<Route>> GetAgencyRoutesAsync(string agencyId, int type);
     
     public Task<List<Trip>> GetRouteTripsAsync(int routeId);
     

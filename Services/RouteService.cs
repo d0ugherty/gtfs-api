@@ -14,10 +14,10 @@ public class RouteService : IRouteService
         _context = context;
     }
 
-    public async Task<List<Route>> GetAgencyRoutesAsync(string agencyId)
+    public async Task<List<Route>> GetAgencyRoutesAsync(string agencyId, int type)
     {
         List<Route> routes = await _context.Routes
-            .Where(rt => rt.GtfsAgencyId.Equals(agencyId.ToUpper()))
+            .Where(rt => rt.GtfsAgencyId.Equals(agencyId) && rt.Type == type)
             .ToListAsync();
         
         return routes;

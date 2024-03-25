@@ -37,13 +37,6 @@ public abstract class BaseAgencyController : ControllerBase
 		return Ok(new { Agency = agency });
 	}
 	
-	[HttpGet("Routes")]
-	public async Task<IActionResult> GetAgencyRoutes()
-	{
-		List<Route> routes =  await _routeService.GetAgencyRoutesAsync(AgencyId);
-            
-		return Ok(new { Routes = routes });
-	}
 	
 	[HttpGet("Trips")]
 	public async Task<ActionResult<IEnumerable<Trip>>> GetAgencyTrips( string gtfsRouteId, int results=10)
@@ -58,10 +51,10 @@ public abstract class BaseAgencyController : ControllerBase
 	}
 	
 	[HttpGet("Stops")]
-	public async Task<ActionResult<IEnumerable<Stop>>> GetAgencyStops()
+	public async Task<ActionResult<IEnumerable<Stop>>> GetAgencyStops(int routeType)
 	{
             
-		List<Route> routes = await _routeService.GetAgencyRoutesAsync(AgencyId);
+		List<Route> routes = await _routeService.GetAgencyRoutesAsync(AgencyId, routeType);
             
 		List<int> routeIds = routes
 			.Select(route => route.Id)

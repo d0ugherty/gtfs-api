@@ -8,10 +8,10 @@ public class Trip
     public string ServiceId { get; set; } = null!;
     public string TripId { get; set; } = null!;
     public string Headsign { get; set; } = null!;
-    public string BlockId { get; set; } = null!;
+    public string? BlockId { get; set; } = null!;
     public string? ShortName { get; set; }
     public string? LongName { get; set; }
-    public int ShapeId { get; set; }
+    public int? ShapeId { get; set; }
     public string GtfsRouteId { get; set; } = null!;
     public int DirectionId { get; set; }
     

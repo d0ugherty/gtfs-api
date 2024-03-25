@@ -14,6 +14,12 @@ builder.Services.AddScoped<IRouteService, RouteService>();
 builder.Services.AddScoped<IAgencyService, AgencyService>();
 builder.Services.AddScoped<IStopService, StopService>();
 builder.Services.AddScoped<IFareService, FareService>();
+builder.Services.AddScoped<IFeedInfoService, FeedInfoService>();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.CustomSchemaIds(type => type.ToString());
+});
 
 builder.Services.AddRazorPages();
 // Database Context
