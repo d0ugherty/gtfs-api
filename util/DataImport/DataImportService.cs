@@ -370,7 +370,6 @@ namespace DataImportUtility
 
                     var tripLookup = latestTrips.ToDictionary(trip => trip.TripId, trip => trip);
 
-                    
                     int row = 1;
                     foreach (var record in records)
                     {
@@ -399,7 +398,8 @@ namespace DataImportUtility
                             {
                                 Console.WriteLine($"Stop {record.stop_id} or Trip {record.trip_id} not found");
                             }
-
+                            // For laptop
+                            if (row >= 500000) break;
                             row++;
                         }
                     }                    

@@ -18,6 +18,7 @@ namespace GtfsApi.Controllers
         : BaseAgencyController(agencyService, routeService, stopService)
     {
         protected override string AgencyId => "SEPTA";
+        protected override string ParentAgency => "SEPTA";
 
         [HttpGet("RssFeedInfo")]
         public async Task<ActionResult<List<FeedInfo>>> GetFeedInformation()
@@ -48,26 +49,22 @@ namespace GtfsApi.Controllers
         [HttpGet("Routes/rail")]
         public async Task<IActionResult> GetAgencyRoutes()
         {
-            List<Route> routes =  await _routeService.GetAgencyRoutesAsync(AgencyId, 2);
+            List<Route> routes =  await _routeService.GetAgencyRoutesAsync(AgencyId);
+
+            List<Route> railRoutes = routes.Where(rt => rt.Type == 2)
+                .Select(rt => rt)
+                .ToList();
             
-            return Ok(new { Routes = routes });
+            return Ok(new { Routes = railRoutes });
         }
         
         [HttpGet("Routes/bus")]
         public async Task<IActionResult> GetAgencyRailRoutes()
         {
-            List<Route> routes =  await _routeService.GetAgencyRoutesAsync(AgencyId, 3);
+            List<Route> routes =  await _routeService.GetAgencyRoutesAsync(AgencyId);
             
             return Ok(new { Routes = routes });
         }  
-        
-        [HttpGet("routes/subway-metro")]
-        public async Task<IActionResult> GetAgencyMetroRoutes()
-        {
-            List<Route> routes =  await _routeService.GetAgencyRoutesAsync(AgencyId, 1);
-            
-            return Ok(new { Routes = routes });
-        }
         
     }
 }

@@ -13,6 +13,7 @@ public abstract class BaseAgencyController : ControllerBase
 	protected readonly IStopService _stopService;
 
 	protected abstract string AgencyId { get; }
+	protected abstract string ParentAgency { get; }
 
 	protected BaseAgencyController(IAgencyService agencyService, IRouteService routeService, IStopService stopService)
 	{
@@ -24,7 +25,7 @@ public abstract class BaseAgencyController : ControllerBase
 	[HttpGet("Agencies")]
 	public async Task<ActionResult<IEnumerable<Agency>>> GetAgencies()
 	{
-		List<Agency> agencies = await _agencyService.GetAllAgencies();
+		List<Agency> agencies = await _agencyService.GetAllAgencies(ParentAgency);
             
 		return  Ok(new { Agencies = agencies });
 	}
@@ -39,7 +40,7 @@ public abstract class BaseAgencyController : ControllerBase
 	
 	
 	[HttpGet("Trips")]
-	public async Task<ActionResult<IEnumerable<Trip>>> GetAgencyTrips( string gtfsRouteId, int results=10)
+	public async Task<ActionResult<IEnumerable<Trip>>> GetRouteTrips(string gtfsRouteId, int results=10)
 	{
 		Route route = await _routeService.GetRouteAsync(AgencyId, gtfsRouteId);
 
@@ -51,10 +52,10 @@ public abstract class BaseAgencyController : ControllerBase
 	}
 	
 	[HttpGet("Stops")]
-	public async Task<ActionResult<IEnumerable<Stop>>> GetAgencyStops(int routeType)
+	public async Task<ActionResult<IEnumerable<Stop>>> GetAgencyStops()
 	{
             
-		List<Route> routes = await _routeService.GetAgencyRoutesAsync(AgencyId, routeType);
+		List<Route> routes = await _routeService.GetAgencyRoutesAsync(AgencyId);
             
 		List<int> routeIds = routes
 			.Select(route => route.Id)
@@ -78,5 +79,23 @@ public abstract class BaseAgencyController : ControllerBase
 
 		return Ok(new { StopTimes = stopTimes });
 	}
+
+	[HttpGet("routes")]
+	public async Task<ActionResult<IEnumerable<Route>>> GetAllRoutes()
+	{
+		List<Route> routes = await _routeService.GetAgencyRoutesAsync(AgencyId);
+		
+		return Ok(new { Routes = routes });
+	}
+
+	[HttpGet("stops/{routeId}")]
+	public async Task<ActionResult<IEnumerable<Stop>>> GetRouteStops(string routeId)
+	{
+		List<Stop> stops = await _routeService.GetRouteStops(AgencyId, routeId);
+		
+		
+		return Ok(new { Stops = stops });
+	}
+	
 	
 }

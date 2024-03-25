@@ -14,6 +14,7 @@ public class NJTransitController(
     : BaseAgencyController(agencyService, routeService, stopService)
 {
     protected override string AgencyId => "NJT";
+    protected override string ParentAgency => "NJ Transit";
     
     [HttpGet("Routes/rail")]
     public async Task<IActionResult> GetAgencyRoutes()

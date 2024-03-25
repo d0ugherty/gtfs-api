@@ -13,6 +13,8 @@ public class AmtrakController(
     IFeedInfoService feedInfoService) : BaseAgencyController(agencyService, routeService, stopService)
 {
     protected override string AgencyId => "Amtrak";
+    protected override string ParentAgency => "Amtrak";
+
     
     [HttpGet("RssFeedInfo")]
     public async Task<ActionResult<List<FeedInfo>>> GetFeedInformation()

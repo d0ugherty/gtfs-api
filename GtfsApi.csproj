@@ -28,4 +28,9 @@
     <_ContentIncludedByDefault Remove="util\DataImport\obj\project.assets.json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="data\NJ Transit\" />
+    <Folder Include="data\SEPTA\" />
+  </ItemGroup>
+
 </Project>

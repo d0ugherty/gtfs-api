@@ -14,10 +14,10 @@ public class RouteService : IRouteService
         _context = context;
     }
 
-    public async Task<List<Route>> GetAgencyRoutesAsync(string agencyId, int type)
+    public async Task<List<Route>> GetAgencyRoutesAsync(string agencyId)
     {
         List<Route> routes = await _context.Routes
-            .Where(rt => rt.GtfsAgencyId.Equals(agencyId) && rt.Type == type)
+            .Where(rt => rt.GtfsAgencyId.Equals(agencyId))
             .ToListAsync();
         
         return routes;
@@ -44,9 +44,7 @@ public class RouteService : IRouteService
 
     public async Task<List<Trip>> GetRouteTripsAsync(List<int> routeIds)
     {
-        List<Trip> trips;
-
-        trips = await _context.Trips
+        List<Trip> trips = await _context.Trips
             .Where(trip => routeIds.Contains(trip.Fk_routeId))
             .ToListAsync();
 
@@ -66,5 +64,22 @@ public class RouteService : IRouteService
        List<int> stopIds = stopTimes.Select(stopTime => stopTime!.Fk_stopId).ToList();
         
        return stopIds;
+    }
+
+    public async Task<List<Stop>> GetRouteStops(string agencyId, string routeId)
+    {
+        Route route = await _context.Routes
+            .FirstAsync(rt => rt.RouteId.Equals(routeId) && rt.Agency.AgencyId.Equals(agencyId));
+
+        List<Stop> stops = await _context.Stops
+            .FromSqlRaw("SELECT s.* " +
+                        "FROM Stops as s " +
+                        "JOIN StopTimes st ON s.Id = st.Fk_stopId " +
+                        "JOIN Trips t ON st.Fk_tripId = t.Id " +
+                        "JOIN Routes r ON t.Fk_tripId = t.Id " +
+                        "WHERE r.RouteId = {0} AND r.AgencyId {1} ", routeId, agencyId 
+                        ).ToListAsync();
+
+        return stops;
     }
 }

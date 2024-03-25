@@ -4,26 +4,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GtfsApi.Services;
 
-public class AgencyService : IAgencyService
+public class AgencyService(GtfsContext context) : IAgencyService
 
 {
-    private readonly GtfsContext _context;
-
-    public AgencyService(GtfsContext context)
+    /**
+     * Retrieves all Agency rows associated with the data source
+     * i.e. NJ Transit, SEPTA, or Amtrak
+     */
+    public async Task<List<Agency>> GetAllAgencies(string parentAgency)
     {
-        _context = context;
-    }
-
-    public async Task<List<Agency>> GetAllAgencies()
-    {
-        var agencies = await _context.Agencies.ToListAsync();
+        var agencies = await context.Agencies
+            .Where(agency => agency.ParentAgency.Name.Equals(parentAgency))
+            .ToListAsync();
 
         return agencies;
     }
     
-    public async Task<Agency?> GetAgencyByGtfsId(string gtfsAgencyId)
+    public async Task<Agency> GetAgencyByGtfsId(string gtfsAgencyId)
     {
-        var agency = await _context.Agencies
+        var agency = await context.Agencies
             .Where(ag => ag.AgencyId.Equals(gtfsAgencyId))
             .FirstOrDefaultAsync();
         
