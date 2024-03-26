@@ -18,4 +18,6 @@ public interface IRouteService
     public Task<List<Stop>> GetRouteStops(string agencyId, string routeId);
 
     public Task<List<Route>> GetRoutesByTypeAsync(string agencyId, int routeType);
+
+    public Task<List<Shape>> GetRouteShapesAsync(string agencyId, string routeId, int pageNumber);
 }

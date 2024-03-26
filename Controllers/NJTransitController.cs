@@ -44,7 +44,7 @@ public class NJTransitController(
     [HttpGet("stops/newark-light-rail")]
     public async Task<IActionResult> GetNewarkLightRailStops()
     {
-        List<Stop> stops = await RouteService.GetRouteStops(AgencyId, "16");
+        List<Stop> stops = await RouteService.GetRouteStops(AgencyId, "12");
 		
         return Ok(new { Stops = stops });
     }

@@ -1,5 +1,6 @@
 using GtfsApi.Interfaces;
 using GtfsApi.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Route = GtfsApi.Models.Route;
 
@@ -93,5 +94,21 @@ public class RouteService : IRouteService
             .ToListAsync();
 
         return routes;
+    }
+
+    public async Task<List<Shape>> GetRouteShapesAsync(string agencyId, string routeId, int pageNumber)
+    {
+        Trip trip = await _context.Trips.FirstAsync(tr => tr.GtfsRouteId.Equals(routeId));
+        
+        const int pageSize = 100;
+        int skip = (pageNumber - 1) * pageSize;
+
+        var shapeDataPage = await _context.Shapes
+            .Where(shape => shape.ShapeId == trip.ShapeId)
+            .OrderBy(shape => shape.Id) 
+            .Skip(skip)
+            .Take(pageSize)
+            .ToListAsync();
+        return shapeDataPage;
     }
 }

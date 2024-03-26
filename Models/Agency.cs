@@ -16,9 +16,4 @@ public class Agency
     public int Fk_parentAgencyId { get; set; }
 
     public ParentAgency ParentAgency { get; set; } = null!;
-
-    //[ForeignKey("Mode")]
-    //public int FkModeId { get; set; }
-
-    // public Mode Mode { get; set; } = null!;
 }

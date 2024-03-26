@@ -25,15 +25,7 @@ public class AmtrakController(
             
         return Ok(new { Routes = routes });
     }
-        
-    [HttpGet("routes/bus")]
-    public async Task<IActionResult> GetAgencyRailRoutes()
-    {
-        List<Route> routes =  await RouteService.GetRoutesByTypeAsync(AgencyId, 3);
-            
-        return Ok(new { Routes = routes });
-    }
-
+    
     [HttpGet("routes/amtrak-thruway-service")]
     public async Task<ActionResult<IEnumerable<Route>>> GetThruwayBus()
     {

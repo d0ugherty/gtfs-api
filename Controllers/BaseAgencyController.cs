@@ -43,14 +43,6 @@ public abstract class BaseAgencyController : ControllerBase
 		return  Ok(new { Agencies = agencies });
 	}
 	
-	[HttpGet("AgencyInfo")]
-	public async Task<ActionResult<Agency>> GetAgency()
-	{ 
-		Agency agency = await AgencyService.GetAgencyByGtfsId(AgencyId);
-            
-		return Ok(new { Agency = agency });
-	}
-	
 	[HttpGet("Trips")]
 	public async Task<ActionResult<IEnumerable<Trip>>> GetRouteTrips(string gtfsRouteId, int results=10)
 	{
@@ -100,13 +92,21 @@ public abstract class BaseAgencyController : ControllerBase
 		return Ok(new { Routes = routes });
 	}
 	
-	[HttpGet("stops/{routeId}")]
+	[HttpGet("route-stops")]
 	public async Task<ActionResult<IEnumerable<Stop>>> GetRouteStops(string routeId)
 	{
 		List<Stop> stops = await RouteService.GetRouteStops(AgencyId, routeId);
 		
 		return Ok(new { Stops = stops });
 	}
-	
+
+	[HttpGet("route-shapes")]
+	public async Task<ActionResult<IEnumerable<Shape>>> GetShapes(string routeId, int pageNumber=1)
+	{
+		List<Shape> shapeData = await RouteService.GetRouteShapesAsync(AgencyId, routeId, pageNumber);
+		
+		return Ok(new { Shapes = shapeData });
+	}
+ 	
 	
 }
