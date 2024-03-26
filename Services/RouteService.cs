@@ -69,21 +69,27 @@ public class RouteService : IRouteService
     public async Task<List<Stop>> GetRouteStops(string agencyId, string routeId)
     {
         List<Stop> stops = await _context.Stops
-            .FromSqlRaw("SELECT s.* " +
+            .FromSqlRaw("SELECT DISTINCT s.* " +
                         "FROM Stops as s " +
                         "JOIN StopTimes st ON s.Id = st.Fk_stopId " +
                         "JOIN Trips t ON st.Fk_tripId = t.Id " +
-                        "JOIN Routes r ON t.Fk_tripId = t.Id " +
-                        "WHERE r.RouteId = {0} AND r.AgencyId {1} ", routeId, agencyId 
+                        "JOIN Routes r ON t.Fk_routeId = r.Id " +
+                        "WHERE r.RouteId = {0} AND r.GtfsAgencyId = {1} ", routeId, agencyId 
                         ).ToListAsync();
 
         return stops;
     }
 
-    public async Task<List<Route>> GetRoutesByTypeAsync(string agencyId, int routeType)
+    public async Task<List<Route>> GetRoutesByTypeAsync(string agencyName, int routeType)
     {
+        var agency = _context.Agencies
+            .FirstOrDefault(agency => agency.Name.Equals(agencyName));
+        
+        var parentAgency = _context.ParentAgencies
+            .FirstOrDefault(pa => agency != null && pa.Id == agency.Fk_parentAgencyId);
+        
         List<Route> routes = await _context.Routes
-            .Where(rt => rt.GtfsAgencyId.Equals(agencyId) && rt.Type == routeType)
+            .Where(route => parentAgency != null && route.Agency.ParentAgency.Id == parentAgency.Id && route.Type == routeType)
             .ToListAsync();
 
         return routes;

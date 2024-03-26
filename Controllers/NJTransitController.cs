@@ -33,12 +33,20 @@ public class NJTransitController(
         return Ok(new { Routes = routes });
     }
     
-    [HttpGet("routes/light-rail")]
-    public async Task<IActionResult> GetAgencyLightRailRoutes()
+    [HttpGet("stops/river-line")]
+    public async Task<IActionResult> GetRiverLineStops()
     {
-        List<Route> routes =  await RouteService.GetRoutesByTypeAsync(AgencyId, 0);
-            
-        return Ok(new { Routes = routes });
+        List<Stop> stops = await RouteService.GetRouteStops(AgencyId, "16");
+		
+        return Ok(new { Stops = stops });
+    }
+    
+    [HttpGet("stops/newark-light-rail")]
+    public async Task<IActionResult> GetNewarkLightRailStops()
+    {
+        List<Stop> stops = await RouteService.GetRouteStops(AgencyId, "16");
+		
+        return Ok(new { Stops = stops });
     }
 
 }

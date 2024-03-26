@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using GtfsApi.Interfaces;
 using GtfsApi.Migrations;
 using Microsoft.AspNetCore.Mvc;
@@ -31,5 +32,21 @@ public class AmtrakController(
         List<Route> routes =  await RouteService.GetRoutesByTypeAsync(AgencyId, 3);
             
         return Ok(new { Routes = routes });
+    }
+
+    [HttpGet("routes/amtrak-thruway-service")]
+    public async Task<ActionResult<IEnumerable<Route>>> GetThruwayBus()
+    {
+        List<Route> routes = await RouteService.GetRoutesByTypeAsync(AgencyId, 3);
+
+        List<Route> thruServiceRoutes = routes
+            .Where(route =>
+            {
+                Debug.Assert(route.LongName != null, "route.LongName != null");
+                return route.LongName.Equals("Amtrak Thruway Connecting Service");
+            })
+            .ToList();
+
+        return Ok(new { Routes = thruServiceRoutes });
     }
 }

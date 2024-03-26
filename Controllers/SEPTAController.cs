@@ -9,58 +9,61 @@ namespace GtfsApi.Controllers
 {
     [Route("api/septa")]
     [ApiController]
-    public class SEPTAController(
-        IRouteService routeService,
-        IAgencyService agencyService,
-        IStopService stopService,
-        IFareService fareService,
-        IFeedInfoService feedInfoService)
-        : BaseAgencyController(agencyService, routeService, stopService, feedInfoService)
+    public class SEPTAController : BaseAgencyController
     {
+        private readonly IFareService _fareService;
+
+        public SEPTAController(IRouteService routeService, 
+            IAgencyService agencyService, 
+            IStopService stopService, 
+            IFareService fareService, 
+            IFeedInfoService feedInfoService) 
+            : base(
+                agencyService,
+                routeService, 
+                stopService, 
+                feedInfoService)
+        {
+            _fareService = fareService;
+        }
+
         protected override string AgencyId => "SEPTA";
         protected override string ParentAgency => "SEPTA";
         
-        [HttpGet("regional-rail/Fare")]
+        [HttpGet("FareInfo/regional-rail")]
         public async Task<ActionResult<Fare>> GetFare(string origin, string destination)
         {
-            Fare fare = await fareService.GetFare(origin, destination);
+            Fare fare = await _fareService.GetFare(origin, destination);
 
             return Ok(new { Fare = fare });
         }
 
-        [HttpGet("regional-rail/FarePrice")]
+        [HttpGet("FarePrice/regional-rail")]
         public async Task<ActionResult<float>> GetFarePrice(string origin, string destination)
         {
-            Fare fare = await fareService.GetFare(origin, destination);
+            Fare fare = await _fareService.GetFare(origin, destination);
 
-            float price = await fareService.GetFarePrice(fare);
+            float price = await _fareService.GetFarePrice(fare);
 
             return Ok(new { Price = price });
         }
-        
-        [HttpGet("routes/rail")]
-        public async Task<IActionResult> GetAgencyRoutes()
+
+        [HttpGet("routes/regional-rail")]
+        public async Task<ActionResult<IEnumerable<Route>>> GetRailRoutes()
         {
-            List<Route> routes =  await RouteService.GetRoutesByTypeAsync(AgencyId, 2);
-            
+            List<Route> routes = await RouteService.GetRoutesByTypeAsync(AgencyId, 2);
+
             return Ok(new { Routes = routes });
         }
         
         [HttpGet("routes/bus")]
-        public async Task<IActionResult> GetAgencyRailRoutes()
+        public async Task<ActionResult<IEnumerable<Route>>> GetBusRoutes()
         {
-            List<Route> routes =  await RouteService.GetRoutesByTypeAsync(AgencyId, 3);
-            
+            List<Route> routes = await RouteService.GetRoutesByTypeAsync(AgencyId, 3);
+
             return Ok(new { Routes = routes });
-        }
-    
-        [HttpGet("routes/light-rail")]
-        public async Task<IActionResult> GetAgencyLightRailRoutes()
-        {
-            List<Route> routes =  await RouteService.GetRoutesByTypeAsync(AgencyId, 0);
-            
-            return Ok(new { Routes = routes });
-        }
+        }  
+        
     }
 }
 
