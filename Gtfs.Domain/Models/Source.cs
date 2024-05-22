@@ -7,4 +7,5 @@ public class Source
 	public required string FilePath { get; set; }
 	
 	public ICollection<Agency> Agencies = new List<Agency>();
+	public ICollection<Calendar> Calendars = new List<Calendar>();
 }

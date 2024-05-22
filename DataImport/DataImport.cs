@@ -157,14 +157,84 @@ public class DataImport
         });
     }
 
-    private void ImportCalendars(string filePath)
+    private void ImportCalendars(string filePath, Source source)
     {
-        throw new NotImplementedException();
+        ReadCsv<CalendarCsv>(filePath, csv =>
+        {
+            var records = csv.GetRecords<CalendarCsv>();
+
+            try
+            {
+                int row = 1;
+
+                foreach (var record in records)
+                {
+                    Console.Write($"{new string(' ', 20)}Importing row {row}\r");
+
+                    var calendar = new Calendar
+                    {
+                        ServiceId = record.service_id,
+                        Monday = record.monday,
+                        Tuesday = record.tuesday,
+                        Wednesday = record.wednesday,
+                        Thursday = record.thursday,
+                        Friday = record.friday,
+                        Saturday = record.saturday,
+                        Sunday = record.sunday,
+                        StartDate = record.start_date,
+                        EndDate = record.end_date,
+                        SourceId = source.Id,
+                        Source = source
+                    };
+
+                    _calendarRepo.Add(calendar);
+
+                    source.Calendars.Add(calendar);
+
+                    row++;
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                                  $"{filePath} \n " +
+                                  $"{ex}");
+                throw;
+            }
+        });
     }
 
     private void ImportCalendarDates(string filePath)
     {
-        throw new NotImplementedException();
+        ReadCsv<CalendarDatesCsv>(filePath, csv =>
+        {
+            var records = csv.GetRecords<CalendarDatesCsv>();
+
+            try
+            {
+                int row = 1;
+
+                foreach (var record in records)
+                {
+                    Console.Write($"{new string(' ', 20)}Importing row {row}\r");
+
+                    _calendarDateRepo.Add(new CalendarDate
+                    {
+                        ServiceId = record.service_id,
+                        Date = record.date,
+                        ExceptionType = record.exception_type
+                    });
+                    row++;
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                                  $"{filePath} \n " +
+                                  $"{ex}");
+                throw;
+            }
+        });
     }
 
     private void ImportFares(string filePath)
@@ -245,7 +315,7 @@ public class DataImport
         {
             ImportTry($"{source.FilePath}/agency.csv", filePath => ImportAgencies(filePath, source));
             
-            ImportTry($"{source.FilePath}/calendar.csv", ImportCalendars);
+            ImportTry($"{source.FilePath}/calendar.csv", filePath => ImportCalendars(filePath, source));
             
             ImportTry($"{source.FilePath}/calendar_dates.csv", ImportCalendarDates);
             
