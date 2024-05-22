@@ -309,12 +309,39 @@ public class DataImport
                               $"{ex}");
             throw;
         }
-        
     }
 
-    private void ImportShapes(string filePath)
+    private void ImportShapes(string filePath, Source source)
     {
-        throw new NotImplementedException();
+        var records = ReadCsv<ShapesCsv>(filePath);
+
+        try
+        {
+            int row = 1;
+
+            foreach (var record in records)
+            {
+                Console.Write($"{new string(' ', 20)}Importing row {row}\r");
+
+                _shapeRepo.Add(new Shape
+                {
+                    ShapeId = record.shape_id,
+                    ShapePtLat = record.shape_pt_lat,
+                    ShapePtLon = record.shape_pt_lon,
+                    Sequence = record.shape_pt_sequence,
+                    DistanceTraveled = record.shape_dist_traveled,
+                    SourceId = source.Id,
+                    Source = source
+                });
+            }
+        } 
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                              $"{filePath} \n " +
+                              $"{ex}");
+            throw;
+        }
     }
 
     private void ImportStops(string filePath)
@@ -395,11 +422,10 @@ public class DataImport
 
             ImportTry($"{source.FilePath}/stop_times.csv", ImportStopTimes);
 
-            ImportTry($"{source.FilePath}/shapes.csv", ImportShapes);
+            ImportTry($"{source.FilePath}/shapes.csv", filePath => ImportShapes(filePath, source));
 
             ImportTry($"{source.FilePath}/trips.csv", ImportTrips);
         }
-
         Console.WriteLine("Done.");
     }
 }
