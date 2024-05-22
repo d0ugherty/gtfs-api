@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gtfs.Domain", "Gtfs.Domain\Gtfs.Domain.csproj", "{75C3456D-5326-4B59-99BD-F8F4BA644D43}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gtfs.DataAccess", "Gtfs.DataAccess\Gtfs.DataAccess.csproj", "{739B7452-44DB-47C4-B030-B04A8AC49EE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GtfsApi", "GtfsApi\GtfsApi.csproj", "{444DC1BD-7A14-44B1-B422-C4C04670F215}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{75C3456D-5326-4B59-99BD-F8F4BA644D43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75C3456D-5326-4B59-99BD-F8F4BA644D43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75C3456D-5326-4B59-99BD-F8F4BA644D43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75C3456D-5326-4B59-99BD-F8F4BA644D43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{739B7452-44DB-47C4-B030-B04A8AC49EE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{739B7452-44DB-47C4-B030-B04A8AC49EE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{739B7452-44DB-47C4-B030-B04A8AC49EE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{739B7452-44DB-47C4-B030-B04A8AC49EE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{444DC1BD-7A14-44B1-B422-C4C04670F215}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{444DC1BD-7A14-44B1-B422-C4C04670F215}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{444DC1BD-7A14-44B1-B422-C4C04670F215}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{444DC1BD-7A14-44B1-B422-C4C04670F215}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
