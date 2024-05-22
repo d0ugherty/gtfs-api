@@ -28,7 +28,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Gtfs.Domain\Gtfs.Domain.csproj" />
-    <ProjectReference Include="..\Gtfs.DataAccess\Gtfs.DataAccess.csproj" />
   </ItemGroup>
   
 </Project>

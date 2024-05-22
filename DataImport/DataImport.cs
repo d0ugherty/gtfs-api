@@ -15,7 +15,7 @@ public class DataImport
     private readonly GtfsContext _context;
     
     private readonly IRepository<Source, int> _sourceRepo;
-    private readonly IRepository<Agency, int> _agencyRepo;
+    private readonly IRepository<Agency, string> _agencyRepo;
     private readonly IRepository<Route, int> _routeRepo;
     private readonly IRepository<Calendar, int> _calendarRepo;
     private readonly IRepository<CalendarDate, int> _calendarDateRepo;
@@ -32,7 +32,7 @@ public class DataImport
         _context = context;
         
         _sourceRepo = new Repository<Source, int>(_context);
-        _agencyRepo = new Repository<Agency, int>(_context);
+        _agencyRepo = new Repository<Agency, string>(_context);
         _routeRepo =  new Repository<Route, int>(_context);
         _calendarRepo = new Repository<Calendar, int>(_context);
         _calendarDateRepo = new Repository<CalendarDate, int>(_context);
@@ -86,7 +86,23 @@ public class DataImport
                 foreach (var record in records)
                 {
                     Console.Write($"{new string(' ', 20)}Importing row {row}\r");
+                
+                    var agency = new Agency {
+                        AgencyId = record.agency_id.Trim(),
+                        Name = record.agency_name.Trim(),
+                        Url = record.agency_url!.Trim(),
+                        Timezone = record.agency_timezone!.Trim(),
+                        Language = record.agency_lang!.Trim(),
+                        Email = record.agency_email!.Trim(),
+                        SourceId = source.Id,
+                        Source = source
+                    };
                     
+                    _agencyRepo.Add(agency);
+
+                    source.Agencies.Add(agency);
+
+                    row++;
                 }
             }
             catch (InvalidOperationException ex)
@@ -99,9 +115,46 @@ public class DataImport
         });
     }
 
-    private void ImportRoutes(string filePath)
+    private void ImportRoutes(string filePath, Source source)
     {
-        throw new NotImplementedException();
+        ReadCsv<Route>(filePath, csv =>
+        {
+            var records = csv.GetRecords<RoutesCsv>();
+            try
+            {
+                int row = 1;
+
+                foreach (var record in records)
+                {
+                    Console.Write($"{new string(' ', 20)}Importing row {row}\r");
+
+                    var agency = _agencyRepo.GetAll()
+                        .FirstOrDefault(a => a.AgencyId.Equals(record.agency_id) && a.SourceId == source.Id);
+
+                    _routeRepo.Add(new Route
+                    {
+                        RouteId = record.route_id,
+                        ShortName = record.route_short_name,
+                        LongName = record.route_long_name,
+                        Description = record.route_desc,
+                        Type = record.route_type,
+                        Color = record.route_color,
+                        TextColor = record.route_text_color,
+                        Url = record.route_url,
+                        AgencyId = agency!.Id,
+                        Agency = agency
+                    });
+                    row++;
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                                  $"{filePath} \n " +
+                                  $"{ex}");
+                throw;
+            }
+        });
     }
 
     private void ImportCalendars(string filePath)
@@ -200,7 +253,7 @@ public class DataImport
             
             ImportTry($"{source.FilePath}/fare_attributes.csv", ImportFareAttributes);
 
-            ImportTry($"{source.FilePath}/routes.csv", ImportRoutes);
+            ImportTry($"{source.FilePath}/routes.csv", filePath => ImportRoutes(filePath, source));
 
             ImportTry($"{source.FilePath}/stops.csv", ImportStops);
 
