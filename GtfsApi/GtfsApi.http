@@ -1,6 +1,0 @@
-@GtfsApi_HostAddress = http://localhost:5296
-
-GET {{GtfsApi_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

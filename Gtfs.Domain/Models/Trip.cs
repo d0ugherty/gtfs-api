@@ -18,7 +18,9 @@ public class Trip
 	public string? LongName { get; set; }
 	
 	public int DirectionId { get; set; }
-    
+
+	public IEnumerable<StopTime>? StopTimes { get; set; }
+	
 	[ForeignKey("Route")]
 	public int RouteId { get; set; }
 

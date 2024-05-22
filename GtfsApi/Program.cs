@@ -1,32 +1,39 @@
-using Gtfs.Domain.Models;
-using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
+using Gtfs.DataAccess;
+using Gtfs.DataAccess.Repository;
+using Gtfs.Domain.Interfaces;
+using Gtfs.Domain.Services;
+using Microsoft.AspNetCore.HttpLogging; // Ensure this matches the namespace where GtfsContext is defined
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-builder.Services.AddControllers();
-
-
 builder.Services.AddSwaggerGen(options =>
 {
-	options.CustomSchemaIds(type => type.ToString());
+    options.CustomSchemaIds(type => type.ToString());
 });
 
 builder.Services.AddRazorPages();
+
 // Database Context
 builder.Services.AddDbContext<GtfsContext>(opt =>
 {
-	opt.UseSqlite(builder.Configuration.GetConnectionString("GtfsApiDatabase") ?? "Data Source = gtfs.db");
-	opt.EnableSensitiveDataLogging();
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=gtfs.db";
+    opt.UseSqlite(connectionString,  x => x.MigrationsAssembly("Gtfs.DataAccess"));
+    opt.EnableSensitiveDataLogging();
 });
 
+builder.Services.AddControllers();
+builder.Services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
+builder.Services.AddScoped<DbContext, GtfsContext>();
+builder.Services.AddScoped<SeptaService>();
+
+
 builder.Services.AddHttpLogging(
-	opts => opts.LoggingFields = HttpLoggingFields.RequestProperties);
+    opts => opts.LoggingFields = HttpLoggingFields.RequestProperties);
 
 builder.Logging.AddFilter(
-	"Microsoft.AspNetCore.HttpLogging", LogLevel.Information);
+    "Microsoft.AspNetCore.HttpLogging", LogLevel.Information);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -35,12 +42,11 @@ builder.WebHost.UseStaticWebAssets();
 
 var app = builder.Build();
 
-
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-	app.UseExceptionHandler("/Error");
-	app.UseHsts();
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
 }
 
 app.UseSwagger();

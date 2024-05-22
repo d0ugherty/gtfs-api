@@ -4,6 +4,7 @@ public class Source
 {
 	public int Id { get; set; }
 	public required string Name { get; set; }
+	public required string FilePath { get; set; }
 	
 	public ICollection<Agency> Agencies = new List<Agency>();
 }

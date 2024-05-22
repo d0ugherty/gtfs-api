@@ -1,0 +1,24 @@
+﻿
+<Project Sdk="Microsoft.NET.Sdk">
+    <ItemGroup>
+      <ProjectReference Include="..\Gtfs.DataAccess\Gtfs.DataAccess.csproj" />
+      <ProjectReference Include="..\Gtfs.Domain\Gtfs.Domain.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <Reference Include="Microsoft.EntityFrameworkCore">
+        <HintPath>..\..\..\..\..\..\..\home\thom\.nuget\packages\microsoft.entityframeworkcore\8.0.5\lib\net8.0\Microsoft.EntityFrameworkCore.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="CsvHelper" Version="32.0.3" />
+    </ItemGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    </PropertyGroup>
+
+</Project>
