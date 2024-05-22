@@ -11,7 +11,8 @@ public class Fare
 	
 	[ForeignKey("FareAttributes")]
 	public int FareAttributesId { get; set; }
-	public required FareAttributes FareAttributes { get; set; }
+
+	public FareAttributes FareAttributes { get; set; } = null!;
 	
 	[ForeignKey("Source")]
 	public int SourceId { get; set; }

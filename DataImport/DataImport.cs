@@ -13,238 +13,303 @@ namespace DataImport;
 public class DataImport
 {
     private readonly GtfsContext _context;
-    
+
     private readonly IRepository<Source, int> _sourceRepo;
     private readonly IRepository<Agency, string> _agencyRepo;
     private readonly IRepository<Route, int> _routeRepo;
     private readonly IRepository<Calendar, int> _calendarRepo;
     private readonly IRepository<CalendarDate, int> _calendarDateRepo;
-    private readonly IRepository<Fare, int> _fareRepo;
+    private readonly IRepository<Fare, string> _fareRepo;
     private readonly IRepository<FareAttributes, int> _fareAttributesRepo;
     private readonly IRepository<Shape, int> _shapeRepo;
     private readonly IRepository<Stop, int> _stopRepo;
     private readonly IRepository<StopTime, int> _stopTimeRepo;
     private readonly IRepository<Trip, int> _tripRepo;
-    
+
 
     public DataImport(GtfsContext context)
     {
         _context = context;
-        
+
         _sourceRepo = new Repository<Source, int>(_context);
+        
         _agencyRepo = new Repository<Agency, string>(_context);
-        _routeRepo =  new Repository<Route, int>(_context);
+        
+        _routeRepo = new Repository<Route, int>(_context);
+        
         _calendarRepo = new Repository<Calendar, int>(_context);
+        
         _calendarDateRepo = new Repository<CalendarDate, int>(_context);
-        _fareRepo = new Repository<Fare, int>(_context);
+        
+        _fareRepo = new Repository<Fare, string>(_context);
+        
         _fareAttributesRepo = new Repository<FareAttributes, int>(_context);
+        
         _shapeRepo = new Repository<Shape, int>(_context);
+        
         _stopRepo = new Repository<Stop, int>(_context);
+        
         _stopTimeRepo = new Repository<StopTime, int>(_context);
+        
         _tripRepo = new Repository<Trip, int>(_context);
     }
 
     private void ImportSources(string filePath)
     {
-        ReadCsv<SourceCsv>(filePath, csv =>
+        var records = ReadCsv<SourceCsv>(filePath);
+
+        try
         {
-            var records = csv.GetRecords<SourceCsv>();
-
-            try
+            int row = 1;
+            foreach (var record in records)
             {
-                int row = 1;
-                foreach (var record in records)
+                Console.Write($"{new string(' ', 20)}Importing row {row}\r");
+
+                _sourceRepo.Add(new Source
                 {
-                    Console.Write($"{new string(' ', 20)}Importing row {row}\r");
-
-                    _sourceRepo.Add(new Source
-                    {
-                        Name = record.name.Trim(),
-                        FilePath = "../data/" + record.name
-                    });
-                    row++;
-                }
+                    Name = record.name.Trim(),
+                    FilePath = "../data/" + record.name
+                });
+                row++;
             }
-            catch (InvalidOperationException ex)
-            {
-                Console.WriteLine($"Invalid operation occurred during importing of \n " +
-                                  $"{filePath} \n " +
-                                  $"{ex}");
-                throw;
-            }
-        });
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                              $"{filePath} \n " +
+                              $"{ex}");
+            throw;
+        }
     }
 
     private void ImportAgencies(string filePath, Source source)
     {
-        ReadCsv<AgencyCsv>(filePath, csv =>
+        var records = ReadCsv<AgencyCsv>(filePath);
+        try
         {
-            var records = csv.GetRecords<AgencyCsv>();
-            try
+            int row = 1;
+            foreach (var record in records)
             {
-                int row = 1;
-                foreach (var record in records)
+                Console.Write($"{new string(' ', 20)}Importing row {row}\r");
+
+                var agency = new Agency
                 {
-                    Console.Write($"{new string(' ', 20)}Importing row {row}\r");
-                
-                    var agency = new Agency {
-                        AgencyId = record.agency_id.Trim(),
-                        Name = record.agency_name.Trim(),
-                        Url = record.agency_url!.Trim(),
-                        Timezone = record.agency_timezone!.Trim(),
-                        Language = record.agency_lang!.Trim(),
-                        Email = record.agency_email!.Trim(),
-                        SourceId = source.Id,
-                        Source = source
-                    };
-                    
-                    _agencyRepo.Add(agency);
+                    AgencyId = record.agency_id.Trim(),
+                    Name = record.agency_name.Trim(),
+                    Url = record.agency_url!.Trim(),
+                    Timezone = record.agency_timezone!.Trim(),
+                    Language = record.agency_lang!.Trim(),
+                    Email = record.agency_email!.Trim(),
+                    SourceId = source.Id,
+                    Source = source
+                };
 
-                    source.Agencies.Add(agency);
+                _agencyRepo.Add(agency);
 
-                    row++;
-                }
+                source.Agencies.Add(agency);
+
+                row++;
             }
-            catch (InvalidOperationException ex)
-            {
-                Console.WriteLine($"Invalid operation occurred during importing of \n " +
-                                  $"{filePath} \n " +
-                                  $"{ex}");
-                throw;
-            }
-        });
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                              $"{filePath} \n " +
+                              $"{ex}");
+            throw;
+        }
     }
 
     private void ImportRoutes(string filePath, Source source)
     {
-        ReadCsv<Route>(filePath, csv =>
+        var records = ReadCsv<RoutesCsv>(filePath);
+        try
         {
-            var records = csv.GetRecords<RoutesCsv>();
-            try
-            {
-                int row = 1;
+            int row = 1;
 
-                foreach (var record in records)
+            foreach (var record in records)
+            {
+                Console.Write($"{new string(' ', 20)}Importing row {row}\r");
+
+                var agency = _agencyRepo.GetAll()
+                    .FirstOrDefault(a => a.AgencyId.Equals(record.agency_id) && a.SourceId == source.Id);
+
+                _routeRepo.Add(new Route
                 {
-                    Console.Write($"{new string(' ', 20)}Importing row {row}\r");
-
-                    var agency = _agencyRepo.GetAll()
-                        .FirstOrDefault(a => a.AgencyId.Equals(record.agency_id) && a.SourceId == source.Id);
-
-                    _routeRepo.Add(new Route
-                    {
-                        RouteId = record.route_id,
-                        ShortName = record.route_short_name,
-                        LongName = record.route_long_name,
-                        Description = record.route_desc,
-                        Type = record.route_type,
-                        Color = record.route_color,
-                        TextColor = record.route_text_color,
-                        Url = record.route_url,
-                        AgencyId = agency!.Id,
-                        Agency = agency
-                    });
-                    row++;
-                }
+                    RouteId = record.route_id,
+                    ShortName = record.route_short_name,
+                    LongName = record.route_long_name,
+                    Description = record.route_desc,
+                    Type = record.route_type,
+                    Color = record.route_color,
+                    TextColor = record.route_text_color,
+                    Url = record.route_url,
+                    AgencyId = agency!.Id,
+                    Agency = agency
+                });
+                row++;
             }
-            catch (InvalidOperationException ex)
-            {
-                Console.WriteLine($"Invalid operation occurred during importing of \n " +
-                                  $"{filePath} \n " +
-                                  $"{ex}");
-                throw;
-            }
-        });
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                              $"{filePath} \n " +
+                              $"{ex}");
+            throw;
+        }
     }
 
     private void ImportCalendars(string filePath, Source source)
     {
-        ReadCsv<CalendarCsv>(filePath, csv =>
+        var records = ReadCsv<CalendarCsv>(filePath);
+
+        try
         {
-            var records = csv.GetRecords<CalendarCsv>();
+            int row = 1;
 
-            try
+            foreach (var record in records)
             {
-                int row = 1;
+                Console.Write($"{new string(' ', 20)}Importing row {row}\r");
 
-                foreach (var record in records)
+                var calendar = new Calendar
                 {
-                    Console.Write($"{new string(' ', 20)}Importing row {row}\r");
+                    ServiceId = record.service_id,
+                    Monday = record.monday,
+                    Tuesday = record.tuesday,
+                    Wednesday = record.wednesday,
+                    Thursday = record.thursday,
+                    Friday = record.friday,
+                    Saturday = record.saturday,
+                    Sunday = record.sunday,
+                    StartDate = record.start_date,
+                    EndDate = record.end_date,
+                    SourceId = source.Id,
+                    Source = source
+                };
 
-                    var calendar = new Calendar
-                    {
-                        ServiceId = record.service_id,
-                        Monday = record.monday,
-                        Tuesday = record.tuesday,
-                        Wednesday = record.wednesday,
-                        Thursday = record.thursday,
-                        Friday = record.friday,
-                        Saturday = record.saturday,
-                        Sunday = record.sunday,
-                        StartDate = record.start_date,
-                        EndDate = record.end_date,
-                        SourceId = source.Id,
-                        Source = source
-                    };
+                _calendarRepo.Add(calendar);
 
-                    _calendarRepo.Add(calendar);
+                source.Calendars.Add(calendar);
 
-                    source.Calendars.Add(calendar);
-
-                    row++;
-                }
+                row++;
             }
-            catch (InvalidOperationException ex)
-            {
-                Console.WriteLine($"Invalid operation occurred during importing of \n " +
-                                  $"{filePath} \n " +
-                                  $"{ex}");
-                throw;
-            }
-        });
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                              $"{filePath} \n " +
+                              $"{ex}");
+            throw;
+        }
     }
 
     private void ImportCalendarDates(string filePath)
     {
-        ReadCsv<CalendarDatesCsv>(filePath, csv =>
+        var records = ReadCsv<CalendarDatesCsv>(filePath);
+        
+        try
         {
-            var records = csv.GetRecords<CalendarDatesCsv>();
+            int row = 1;
 
-            try
+            foreach (var record in records)
             {
-                int row = 1;
+                Console.Write($"{new string(' ', 20)}Importing row {row}\r");
 
-                foreach (var record in records)
+                _calendarDateRepo.Add(new CalendarDate
                 {
-                    Console.Write($"{new string(' ', 20)}Importing row {row}\r");
-
-                    _calendarDateRepo.Add(new CalendarDate
-                    {
-                        ServiceId = record.service_id,
-                        Date = record.date,
-                        ExceptionType = record.exception_type
-                    });
-                    row++;
-                }
+                    ServiceId = record.service_id,
+                    Date = record.date,
+                    ExceptionType = record.exception_type
+                });
+                row++;
             }
-            catch (InvalidOperationException ex)
-            {
-                Console.WriteLine($"Invalid operation occurred during importing of \n " +
-                                  $"{filePath} \n " +
-                                  $"{ex}");
-                throw;
-            }
-        });
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                              $"{filePath} \n " +
+                              $"{ex}");
+            throw;
+        }
     }
 
-    private void ImportFares(string filePath)
+    private void ImportFares(string filePath, Source source)
     {
-        throw new NotImplementedException();
+        var records = ReadCsv<FaresCsv>(filePath);
+
+        try
+        {
+            int row = 1;
+
+            foreach (var record in records)
+            {
+                Console.Write($"{new string(' ', 20)}Importing row {row}\r");
+
+                _fareRepo.Add(new Fare
+                {
+                    FareId = record.fare_id,
+                    OriginId = record.origin_id,
+                    DestinationId = record.destination_id,
+                    SourceId = source.Id,
+                    Source = source
+                });
+
+                row++;
+            }
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                              $"{filePath} \n " +
+                              $"{ex}");
+            throw;
+        }
     }
 
     private void ImportFareAttributes(string filePath)
     {
-        throw new NotImplementedException();
+        var records = ReadCsv<FareAttributesCsv>(filePath);
+
+        try
+        {
+            int row = 1;
+
+            foreach (var record in records)
+            {
+                Console.Write($"{new string(' ', 20)}Importing row {row}\r");
+
+                string fareId = record.fare_id;
+
+                var fare = _fareRepo.GetById(fareId);
+
+                var fareAttributes = new FareAttributes
+                {
+                    Price = record.price,
+                    CurrencyType = record.currency_type,
+                    PaymentMethod = record.payment_method,
+                    Transfers = record.transfers,
+                    TransferDuration = record.transfer_duration,
+                    FareId = fare.Id,
+                    Fare = fare
+                };
+
+                _fareAttributesRepo.Add(fareAttributes);
+
+                fare.FareAttributesId = fareAttributes.Id;
+                fare.FareAttributes = fareAttributes;
+                _context.Update(fare);
+
+                row++;
+            }
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                              $"{filePath} \n " +
+                              $"{ex}");
+            throw;
+        }
+        
     }
 
     private void ImportShapes(string filePath)
@@ -267,7 +332,7 @@ public class DataImport
         throw new NotImplementedException();
     }
 
-    private void ReadCsv<T>(string filePath, Action<CsvReader> import)
+    private IEnumerable<T> ReadCsv<T>(string filePath)
     {
         using (var reader = new StreamReader(filePath))
         {
@@ -278,7 +343,8 @@ public class DataImport
             {
                 csv.Read();
                 csv.ReadHeader();
-                import(csv);
+
+                return csv.GetRecords<T>();
             }
         }
     }
@@ -319,7 +385,7 @@ public class DataImport
             
             ImportTry($"{source.FilePath}/calendar_dates.csv", ImportCalendarDates);
             
-            ImportTry($"{source.FilePath}/fare_rules.csv", ImportFares);
+            ImportTry($"{source.FilePath}/fare_rules.csv", filePath => ImportFares(filePath, source));
             
             ImportTry($"{source.FilePath}/fare_attributes.csv", ImportFareAttributes);
 
