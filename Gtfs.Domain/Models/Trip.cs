@@ -19,7 +19,7 @@ public class Trip
 	
 	public int DirectionId { get; set; }
 
-	public IEnumerable<StopTime>? StopTimes { get; set; }
+	public ICollection<StopTime>? StopTimes = new List<StopTime>();
 	
 	[ForeignKey("Route")]
 	public int RouteId { get; set; }

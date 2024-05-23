@@ -14,17 +14,17 @@ public class DataImport
 {
     private readonly GtfsContext _context;
 
-    private readonly IRepository<Source, int> _sourceRepo;
-    private readonly IRepository<Agency, string> _agencyRepo;
-    private readonly IRepository<Route, int> _routeRepo;
-    private readonly IRepository<Calendar, int> _calendarRepo;
-    private readonly IRepository<CalendarDate, int> _calendarDateRepo;
-    private readonly IRepository<Fare, string> _fareRepo;
-    private readonly IRepository<FareAttributes, int> _fareAttributesRepo;
-    private readonly IRepository<Shape, int> _shapeRepo;
-    private readonly IRepository<Stop, int> _stopRepo;
-    private readonly IRepository<StopTime, int> _stopTimeRepo;
-    private readonly IRepository<Trip, int> _tripRepo;
+    private readonly Repository<Source, int> _sourceRepo;
+    private readonly Repository<Agency, string> _agencyRepo;
+    private readonly Repository<Route, int> _routeRepo;
+    private readonly Repository<Calendar, int> _calendarRepo;
+    private readonly Repository<CalendarDate, int> _calendarDateRepo;
+    private readonly Repository<Fare, string> _fareRepo;
+    private readonly Repository<FareAttributes, int> _fareAttributesRepo;
+    private readonly Repository<Shape, int> _shapeRepo;
+    private readonly Repository<Stop, int> _stopRepo;
+    private readonly Repository<StopTime, int> _stopTimeRepo;
+    private readonly Repository<Trip, int> _tripRepo;
 
 
     public DataImport(GtfsContext context)
@@ -344,14 +344,93 @@ public class DataImport
         }
     }
 
-    private void ImportStops(string filePath)
+    private void ImportStops(string filePath, Source source)
     {
-        throw new NotImplementedException();
+        var records = ReadCsv<StopsCsv>(filePath);
+
+        try
+        {
+            int row = 1;
+
+            foreach (var record in records)
+            {
+                Console.Write($"{new string(' ', 20)}Importing row {row}\r");
+
+                _stopRepo.Add(new Stop
+                {
+                    StopId = record.stop_id,
+                    Name = record.stop_name,
+                    Description = record.stop_desc,
+                    Latitude = record.stop_lat,
+                    Longitude = record.stop_lon,
+                    ZoneId = record.zone_id,
+                    Url = record.stop_url,
+                    SourceId = source.Id,
+                    Source = source
+                });
+
+                row++;
+            }
+        } 
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                              $"{filePath} \n " +
+                              $"{ex}");
+            throw;
+        }
     }
 
-    private void ImportStopTimes(string filePath)
+    private void ImportStopTimes(string filePath, Source source)
     {
-        throw new NotImplementedException();
+        var records = ReadCsv<StopTimesCsv>(filePath);
+
+        try
+        {
+            int row = 1;
+
+            var stops = _stopRepo.GetAll()
+                .Where(s => s.SourceId == source.Id)
+                .ToList();
+
+            var trips = _tripRepo.GetAll()
+                .Where(t => t.Route.Agency.SourceId == source.Id)
+                .ToList();
+            
+            foreach (var record in records)
+            {
+                var stop = stops.Find(s => s.StopId.Equals(record.stop_id));
+                var trip = trips.Find(t => t.TripId.Equals(record.trip_id));
+
+                var stopTime = new StopTime
+                {
+                    ArrivalTime = record.arrival_time,
+                    DepartureTime = record.departure_time,
+                    StopSequence = record.stop_sequence,
+                    PickupType = record.pickup_type,
+                    DropoffType = record.drop_off_type,
+                    StopId = stop.Id,
+                    Stop = stop,
+                    TripId = trip.Id,
+                    Trip = trip
+                };
+
+                _stopTimeRepo.Add(stopTime); 
+                
+                stop.StopTimes.Add(stopTime);
+                trip.StopTimes.Add(stopTime);
+
+                _context.Update(stop);
+                _context.Update(trip);
+            }
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                              $"{filePath} \n " +
+                              $"{ex}");
+            throw;
+        }
     }
 
     private void ImportTrips(string filePath)
@@ -418,13 +497,14 @@ public class DataImport
 
             ImportTry($"{source.FilePath}/routes.csv", filePath => ImportRoutes(filePath, source));
 
-            ImportTry($"{source.FilePath}/stops.csv", ImportStops);
+            ImportTry($"{source.FilePath}/trips.csv", ImportTrips);
+            
+            ImportTry($"{source.FilePath}/stops.csv", filePath => ImportStops(filePath, source));
 
-            ImportTry($"{source.FilePath}/stop_times.csv", ImportStopTimes);
+            ImportTry($"{source.FilePath}/stop_times.csv", filePath => ImportStopTimes(filePath, source));
 
             ImportTry($"{source.FilePath}/shapes.csv", filePath => ImportShapes(filePath, source));
-
-            ImportTry($"{source.FilePath}/trips.csv", ImportTrips);
+            
         }
         Console.WriteLine("Done.");
     }
