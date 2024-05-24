@@ -7,7 +7,7 @@ namespace DataImport
     {
         public static void Main(string[] args)
         {
-            var connectionString = "Data Source=../Gtfs.DataAccess/gtfs.db;";
+            var connectionString = "Data Source=../Gtfs.DataAccess/gtfs.db";
 		    
             var optionsBuilder = new DbContextOptionsBuilder<GtfsContext>();
 		    

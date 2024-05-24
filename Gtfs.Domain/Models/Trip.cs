@@ -23,8 +23,6 @@ public class Trip
 
 	public ICollection<StopTime> StopTimes = new List<StopTime>();
 	
-	public ICollection<Shape> Shapes = new List<Shape>();
-	
 	[ForeignKey("Route")]
 	public int RouteId { get; set; }
 

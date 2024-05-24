@@ -130,9 +130,6 @@ namespace Gtfs.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("FareAttributesId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("FareId")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -145,8 +142,6 @@ namespace Gtfs.DataAccess.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("FareAttributesId");
 
                     b.HasIndex("SourceId");
 
@@ -421,19 +416,11 @@ namespace Gtfs.DataAccess.Migrations
 
             modelBuilder.Entity("Gtfs.Domain.Models.Fare", b =>
                 {
-                    b.HasOne("Gtfs.Domain.Models.FareAttributes", "FareAttributes")
-                        .WithMany()
-                        .HasForeignKey("FareAttributesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Gtfs.Domain.Models.Source", "Source")
                         .WithMany()
                         .HasForeignKey("SourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("FareAttributes");
 
                     b.Navigation("Source");
                 });

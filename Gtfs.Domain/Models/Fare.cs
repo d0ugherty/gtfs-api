@@ -9,11 +9,6 @@ public class Fare
 	public string OriginId { get; set; } = null!;
 	public string DestinationId { get; set; } = null!;
 	
-	[ForeignKey("FareAttributes")]
-	public int FareAttributesId { get; set; }
-
-	public FareAttributes FareAttributes { get; set; } = null!;
-	
 	[ForeignKey("Source")]
 	public int SourceId { get; set; }
 	public required Source Source { get; set; }

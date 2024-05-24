@@ -72,6 +72,8 @@ public class DataImport
                 });
                 row++;
             }
+
+            Console.WriteLine("Saving changes.");
             _context.SaveChanges();
         }
         catch (InvalidOperationException ex)
@@ -100,7 +102,7 @@ public class DataImport
                     Url = record.agency_url!.Trim(),
                     Timezone = record.agency_timezone!.Trim(),
                     Language = record.agency_lang!.Trim(),
-                    Email = record.agency_email!.Trim(),
+                    Email = record.agency_email?.Trim() ?? string.Empty,
                     SourceId = source.Id,
                     Source = source
                 };
@@ -111,6 +113,8 @@ public class DataImport
 
                 row++;
             }
+            Console.WriteLine("Saving changes.\n");
+
             _context.SaveChanges();
         }
         catch (InvalidOperationException ex)
@@ -135,7 +139,7 @@ public class DataImport
 
                 var agency = _agencyRepo.GetAll()
                     .FirstOrDefault(a => a.AgencyId.Equals(record.agency_id) && a.SourceId == source.Id);
-
+                
                 _routeRepo.Add(new Route
                 {
                     RouteId = record.route_id,
@@ -149,8 +153,11 @@ public class DataImport
                     AgencyId = agency!.Id,
                     Agency = agency
                 });
+                
                 row++;
             }
+            Console.WriteLine("Saving changes.");
+
             _context.SaveChanges();
         }
         catch (InvalidOperationException ex)
@@ -193,9 +200,11 @@ public class DataImport
                 _calendarRepo.Add(calendar);
 
                 source.Calendars.Add(calendar);
-
+                
                 row++;
             }
+            Console.WriteLine("Saving changes.");
+
             _context.SaveChanges();
         }
         catch (InvalidOperationException ex)
@@ -225,8 +234,11 @@ public class DataImport
                     Date = record.date,
                     ExceptionType = record.exception_type
                 });
+                
                 row++;
             }
+            Console.WriteLine("Saving changes.");
+
             _context.SaveChanges();
         }
         catch (InvalidOperationException ex)
@@ -261,6 +273,8 @@ public class DataImport
 
                 row++;
             }
+            Console.WriteLine("Saving changes.");
+
             _context.SaveChanges();
         }
         catch (InvalidOperationException ex)
@@ -300,12 +314,14 @@ public class DataImport
 
                 _fareAttributesRepo.Add(fareAttributes);
 
-                fare.FareAttributesId = fareAttributes.Id;
-                fare.FareAttributes = fareAttributes;
+               // fare.FareAttributesId = fareAttributes.Id;
+             //   fare.FareAttributes = fareAttributes;
                 _context.Update(fare);
 
                 row++;
             }
+            Console.WriteLine("Saving changes.");
+
             _context.SaveChanges();
         }
         catch (InvalidOperationException ex)
@@ -324,16 +340,9 @@ public class DataImport
         try
         {
             int row = 1;
-
-            var trips = _tripRepo.GetAll()
-                .Where(t => t.SourceId == source.Id)
-                .ToList();
-            
             foreach (var record in records)
             {
                 Console.Write($"{new string(' ', 20)}Importing row {row}\r");
-
-                var trip = trips.FirstOrDefault(t => t.ShapeId == record.shape_id);
                 
                 var shape = new Shape
                 {
@@ -347,8 +356,10 @@ public class DataImport
                 };
                 
                 _shapeRepo.Add(shape);
-                trip!.Shapes.Add(shape);
+                row++;
             }
+            Console.WriteLine("Saving changes.");
+
             _context.SaveChanges();
         } 
         catch (InvalidOperationException ex)
@@ -387,6 +398,8 @@ public class DataImport
 
                 row++;
             }
+            Console.WriteLine("Saving changes.");
+
             _context.SaveChanges();
         } 
         catch (InvalidOperationException ex)
@@ -441,7 +454,8 @@ public class DataImport
 
                 row++;
             }
-            
+            Console.WriteLine("Saving changes.");
+
             _context.SaveChanges();
         }
         catch (InvalidOperationException ex)
@@ -470,7 +484,6 @@ public class DataImport
                 Console.Write($"{new string(' ', 20)}Importing row {row}\r");
 
                 var route = routes.Find(r => r.RouteId.Equals(record.route_id));
-               // var shape = shapes.Find(s => s.ShapeId == record.shape_id);
 
                 var trip = new Trip
                 {
@@ -480,7 +493,7 @@ public class DataImport
                     BlockId = record.block_id,
                     ShortName = record.trip_short_name,
                     DirectionId = record.direction_id,
-                    RouteId = route!.Id,
+                    RouteId = route.Id,
                     Route = route,
                     SourceId = source.Id,
                     Source = source
@@ -488,7 +501,11 @@ public class DataImport
 
                 _tripRepo.Add(trip);
                 route.Trips.Add(trip);
+
+                row++;
             }
+            Console.WriteLine("Saving changes.");
+
             _context.SaveChanges();
         }
         catch (InvalidOperationException ex)
@@ -512,7 +529,7 @@ public class DataImport
                 csv.Read();
                 csv.ReadHeader();
 
-                return csv.GetRecords<T>();
+                return csv.GetRecords<T>().ToList();
             }
         }
     }
@@ -559,13 +576,13 @@ public class DataImport
                 ImportTry($"{source.FilePath}/{type}/fare_rules.csv", filePath => ImportFares(filePath, source));
 
                 ImportTry($"{source.FilePath}/{type}/fare_attributes.csv", filePath => ImportFareAttributes(filePath, source));
-
+                
+                ImportTry($"{source.FilePath}/{type}/routes.csv", filePath => ImportRoutes(filePath, source));
+                
                 ImportTry($"{source.FilePath}/{type}/trips.csv", filePath => ImportTrips(filePath, source));
 
                 ImportTry($"{source.FilePath}/{type}/shapes.csv", filePath => ImportShapes(filePath, source));
-
-                ImportTry($"{source.FilePath}/{type}/routes.csv", filePath => ImportRoutes(filePath, source));
-
+                
                 ImportTry($"{source.FilePath}/{type}/stops.csv", filePath => ImportStops(filePath, source));
 
                 ImportTry($"{source.FilePath}/{type}/stop_times.csv", filePath => ImportStopTimes(filePath, source));
