@@ -1,3 +1,5 @@
+using Gtfs.Domain.Models;
+
 namespace Gtfs.Domain.Interfaces;
 
 public interface IRepository<T,K>

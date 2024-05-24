@@ -19,15 +19,18 @@ public class Trip
 	
 	public int DirectionId { get; set; }
 
-	public ICollection<StopTime>? StopTimes = new List<StopTime>();
+	public int ShapeId { get; set; }
+
+	public ICollection<StopTime> StopTimes = new List<StopTime>();
+	
+	public ICollection<Shape> Shapes = new List<Shape>();
 	
 	[ForeignKey("Route")]
 	public int RouteId { get; set; }
 
 	public required Route Route { get; set; }
 	
-	[ForeignKey("Shape")]
-	public int ShapeId { get; set; }
-
-	public required Shape Shape { get; set; }
+	[ForeignKey("Source")]
+	public int SourceId { get; set; }
+	public required Source Source { get; set; }
 }

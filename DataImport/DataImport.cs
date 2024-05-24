@@ -72,6 +72,7 @@ public class DataImport
                 });
                 row++;
             }
+            _context.SaveChanges();
         }
         catch (InvalidOperationException ex)
         {
@@ -110,6 +111,7 @@ public class DataImport
 
                 row++;
             }
+            _context.SaveChanges();
         }
         catch (InvalidOperationException ex)
         {
@@ -149,6 +151,7 @@ public class DataImport
                 });
                 row++;
             }
+            _context.SaveChanges();
         }
         catch (InvalidOperationException ex)
         {
@@ -193,6 +196,7 @@ public class DataImport
 
                 row++;
             }
+            _context.SaveChanges();
         }
         catch (InvalidOperationException ex)
         {
@@ -223,6 +227,7 @@ public class DataImport
                 });
                 row++;
             }
+            _context.SaveChanges();
         }
         catch (InvalidOperationException ex)
         {
@@ -256,6 +261,7 @@ public class DataImport
 
                 row++;
             }
+            _context.SaveChanges();
         }
         catch (InvalidOperationException ex)
         {
@@ -266,7 +272,7 @@ public class DataImport
         }
     }
 
-    private void ImportFareAttributes(string filePath)
+    private void ImportFareAttributes(string filePath, Source source)
     {
         var records = ReadCsv<FareAttributesCsv>(filePath);
 
@@ -278,9 +284,8 @@ public class DataImport
             {
                 Console.Write($"{new string(' ', 20)}Importing row {row}\r");
 
-                string fareId = record.fare_id;
-
-                var fare = _fareRepo.GetById(fareId);
+                var fare = _fareRepo.GetAll()
+                    .FirstOrDefault(f => f.FareId.Equals(record.fare_id) && f.SourceId == source.Id);
 
                 var fareAttributes = new FareAttributes
                 {
@@ -289,7 +294,7 @@ public class DataImport
                     PaymentMethod = record.payment_method,
                     Transfers = record.transfers,
                     TransferDuration = record.transfer_duration,
-                    FareId = fare.Id,
+                    FareId = fare!.Id,
                     Fare = fare
                 };
 
@@ -301,6 +306,7 @@ public class DataImport
 
                 row++;
             }
+            _context.SaveChanges();
         }
         catch (InvalidOperationException ex)
         {
@@ -319,11 +325,17 @@ public class DataImport
         {
             int row = 1;
 
+            var trips = _tripRepo.GetAll()
+                .Where(t => t.SourceId == source.Id)
+                .ToList();
+            
             foreach (var record in records)
             {
                 Console.Write($"{new string(' ', 20)}Importing row {row}\r");
 
-                _shapeRepo.Add(new Shape
+                var trip = trips.FirstOrDefault(t => t.ShapeId == record.shape_id);
+                
+                var shape = new Shape
                 {
                     ShapeId = record.shape_id,
                     ShapePtLat = record.shape_pt_lat,
@@ -332,8 +344,12 @@ public class DataImport
                     DistanceTraveled = record.shape_dist_traveled,
                     SourceId = source.Id,
                     Source = source
-                });
+                };
+                
+                _shapeRepo.Add(shape);
+                trip!.Shapes.Add(shape);
             }
+            _context.SaveChanges();
         } 
         catch (InvalidOperationException ex)
         {
@@ -371,6 +387,7 @@ public class DataImport
 
                 row++;
             }
+            _context.SaveChanges();
         } 
         catch (InvalidOperationException ex)
         {
@@ -399,8 +416,10 @@ public class DataImport
             
             foreach (var record in records)
             {
-                var stop = stops.Find(s => s.StopId.Equals(record.stop_id));
-                var trip = trips.Find(t => t.TripId.Equals(record.trip_id));
+                Console.Write($"{new string(' ', 20)}Importing row {row}\r");
+
+                var stop = stops.FirstOrDefault(s => s.StopId.Equals(record.stop_id));
+                var trip = trips.FirstOrDefault(t => t.TripId.Equals(record.trip_id));
 
                 var stopTime = new StopTime
                 {
@@ -409,20 +428,21 @@ public class DataImport
                     StopSequence = record.stop_sequence,
                     PickupType = record.pickup_type,
                     DropoffType = record.drop_off_type,
-                    StopId = stop.Id,
+                    StopId = stop!.Id,
                     Stop = stop,
-                    TripId = trip.Id,
+                    TripId = trip!.Id,
                     Trip = trip
                 };
 
                 _stopTimeRepo.Add(stopTime); 
                 
                 stop.StopTimes.Add(stopTime);
-                trip.StopTimes.Add(stopTime);
+                trip.StopTimes!.Add(stopTime);
 
-                _context.Update(stop);
-                _context.Update(trip);
+                row++;
             }
+            
+            _context.SaveChanges();
         }
         catch (InvalidOperationException ex)
         {
@@ -433,9 +453,51 @@ public class DataImport
         }
     }
 
-    private void ImportTrips(string filePath)
+    private void ImportTrips(string filePath, Source source)
     {
-        throw new NotImplementedException();
+        var records = ReadCsv<TripsCsv>(filePath);
+
+        try
+        {
+            int row = 1;
+
+            var routes = _routeRepo.GetAll()
+                .Where(r => r.Agency.SourceId == source.Id)
+                .ToList();
+            
+            foreach (var record in records)
+            {
+                Console.Write($"{new string(' ', 20)}Importing row {row}\r");
+
+                var route = routes.Find(r => r.RouteId.Equals(record.route_id));
+               // var shape = shapes.Find(s => s.ShapeId == record.shape_id);
+
+                var trip = new Trip
+                {
+                    ServiceId = record.service_id,
+                    TripId = record.trip_id,
+                    Headsign = record.trip_headsign,
+                    BlockId = record.block_id,
+                    ShortName = record.trip_short_name,
+                    DirectionId = record.direction_id,
+                    RouteId = route!.Id,
+                    Route = route,
+                    SourceId = source.Id,
+                    Source = source
+                };
+
+                _tripRepo.Add(trip);
+                route.Trips.Add(trip);
+            }
+            _context.SaveChanges();
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"Invalid operation occurred during importing of \n " +
+                              $"{filePath} \n " +
+                              $"{ex}");
+            throw;
+        }
     }
 
     private IEnumerable<T> ReadCsv<T>(string filePath)
@@ -454,8 +516,7 @@ public class DataImport
             }
         }
     }
-
-
+    
     private void ImportTry(string filePath, Action<string> import)
     {
         if (File.Exists(filePath))
@@ -483,28 +544,32 @@ public class DataImport
 
         var sources = _sourceRepo.GetAll();
 
+        List<string> transitTypes = ["rail", "bus"];
+
         foreach (var source in sources)
         {
-            ImportTry($"{source.FilePath}/agency.csv", filePath => ImportAgencies(filePath, source));
-            
-            ImportTry($"{source.FilePath}/calendar.csv", filePath => ImportCalendars(filePath, source));
-            
-            ImportTry($"{source.FilePath}/calendar_dates.csv", ImportCalendarDates);
-            
-            ImportTry($"{source.FilePath}/fare_rules.csv", filePath => ImportFares(filePath, source));
-            
-            ImportTry($"{source.FilePath}/fare_attributes.csv", ImportFareAttributes);
+            foreach (var type in transitTypes)
+            {
+                ImportTry($"{source.FilePath}/{type}/agency.csv", filePath => ImportAgencies(filePath, source));
 
-            ImportTry($"{source.FilePath}/routes.csv", filePath => ImportRoutes(filePath, source));
+                ImportTry($"{source.FilePath}/{type}/calendar.csv", filePath => ImportCalendars(filePath, source));
 
-            ImportTry($"{source.FilePath}/trips.csv", ImportTrips);
-            
-            ImportTry($"{source.FilePath}/stops.csv", filePath => ImportStops(filePath, source));
+                ImportTry($"{source.FilePath}/{type}/calendar_dates.csv", ImportCalendarDates);
 
-            ImportTry($"{source.FilePath}/stop_times.csv", filePath => ImportStopTimes(filePath, source));
+                ImportTry($"{source.FilePath}/{type}/fare_rules.csv", filePath => ImportFares(filePath, source));
 
-            ImportTry($"{source.FilePath}/shapes.csv", filePath => ImportShapes(filePath, source));
-            
+                ImportTry($"{source.FilePath}/{type}/fare_attributes.csv", filePath => ImportFareAttributes(filePath, source));
+
+                ImportTry($"{source.FilePath}/{type}/trips.csv", filePath => ImportTrips(filePath, source));
+
+                ImportTry($"{source.FilePath}/{type}/shapes.csv", filePath => ImportShapes(filePath, source));
+
+                ImportTry($"{source.FilePath}/{type}/routes.csv", filePath => ImportRoutes(filePath, source));
+
+                ImportTry($"{source.FilePath}/{type}/stops.csv", filePath => ImportStops(filePath, source));
+
+                ImportTry($"{source.FilePath}/{type}/stop_times.csv", filePath => ImportStopTimes(filePath, source));
+            }
         }
         Console.WriteLine("Done.");
     }
