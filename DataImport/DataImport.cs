@@ -139,8 +139,8 @@ public class DataImport
 
                 var agency = _agencyRepo.GetAll()
                     .FirstOrDefault(a => a.AgencyId.Equals(record.agency_id) && a.SourceId == source.Id);
-                
-                _routeRepo.Add(new Route
+
+                var route = new Route
                 {
                     RouteId = record.route_id,
                     ShortName = record.route_short_name,
@@ -152,7 +152,11 @@ public class DataImport
                     Url = record.route_url,
                     AgencyId = agency!.Id,
                     Agency = agency
-                });
+                };
+                
+                _routeRepo.Add(route);
+
+                agency.Routes.Add(route);
                 
                 row++;
             }

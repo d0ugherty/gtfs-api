@@ -18,7 +18,7 @@ builder.Services.AddRazorPages();
 // Database Context
 builder.Services.AddDbContext<GtfsContext>(opt =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=gtfs.db";
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=../Gtfs.DataAccess/gtfs.db";
     opt.UseSqlite(connectionString,  x => x.MigrationsAssembly("Gtfs.DataAccess"));
     opt.EnableSensitiveDataLogging();
 });

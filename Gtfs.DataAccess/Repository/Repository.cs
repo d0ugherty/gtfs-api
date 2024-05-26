@@ -1,5 +1,4 @@
 using Gtfs.Domain.Interfaces;
-using Gtfs.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gtfs.DataAccess.Repository;
@@ -20,7 +19,12 @@ public class Repository<T,K> : IRepository<T,K> where T : class
 
 	public T GetById(K id)
 	{
-		return _dbSet.Find(id) ?? throw new InvalidOperationException();
+		var entity = _dbSet.Find(id);
+		if (entity == null)
+		{
+			throw new KeyNotFoundException($"Entity with ID {id} not found.");
+		}
+		return entity;
 	}
     
 	public void Add(T obj)

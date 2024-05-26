@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GtfsApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("gtfs/[controller]")]
     [ApiController]
     public class SEPTAController : ControllerBase
     {
@@ -22,7 +22,7 @@ namespace GtfsApi.Controllers
             _agencyName = "SEPTA";
         }
 
-        [HttpGet("All-Routes")]
+        [HttpGet("routes/all")]
         public async Task<ActionResult<List<Route>>> GetAllRoutes()
         {
             var routes = await _routeService.GetRoutesByAgency(_agencyName);
@@ -30,10 +30,18 @@ namespace GtfsApi.Controllers
             return Ok(new { Routes = routes });
         }
         
-        [HttpGet("RR-Routes")]
+        [HttpGet("routes/regional-rail")]
         public async Task<ActionResult<List<Route>>> GetRegionalRailRoutes()
         {
             var routes = await _routeService.GetRoutesByAgencyAndType(_agencyName, 2);
+
+            return Ok(new { Routes = routes });
+        }
+        
+        [HttpGet("routes/bus")]
+        public async Task<ActionResult<List<Route>>> GetBusRoutes()
+        {
+            var routes = await _routeService.GetRoutesByAgencyAndType(_agencyName, 3);
 
             return Ok(new { Routes = routes });
         }

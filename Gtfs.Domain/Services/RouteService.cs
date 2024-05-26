@@ -15,14 +15,8 @@ public class RouteService
 
     public async Task<List<Route>> GetRoutesByAgency(string agencyName)
     {
-        var query = _routeRepo.GetAll()
-            .Include(r => r.Agency)
-            .Where(r => r.Agency.Name.Equals(agencyName));
-
-        var routes = await query.ToListAsync();
-        Console.WriteLine($"Found {routes.Count} routes for agency '{agencyName}'");
         
-        routes = await _routeRepo.GetAll()
+        var routes = await _routeRepo.GetAll()
             .Include(r => r.Agency)
             .Where(r => r.Agency.Name.Equals(agencyName))
             .Select(r => new Route
