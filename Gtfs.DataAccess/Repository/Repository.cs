@@ -13,9 +13,9 @@ public class Repository<T,K> : IRepository<T,K> where T : class
 		_dbSet = context.Set<T>();
 	}
 
-	public IEnumerable<T> GetAll()
+	public IQueryable<T> GetAll()
 	{
-		return _dbSet.ToList();
+		return _dbSet.AsQueryable();
 	}
 
 	public T GetById(K id)

@@ -8,8 +8,9 @@
 
 # data files
 data
-Gtfs.DataAccess/*.db
+Gtfs.DataAccess/gtfs.db
 Gtfs.DataAccess/gtfs.db-wal
+Gtfs.DataAccess/gtfs.db-shm
 
 # User-specific files
 *.rsuser

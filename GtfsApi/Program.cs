@@ -26,7 +26,8 @@ builder.Services.AddDbContext<GtfsContext>(opt =>
 builder.Services.AddControllers();
 builder.Services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
 builder.Services.AddScoped<DbContext, GtfsContext>();
-builder.Services.AddScoped<SeptaService>();
+builder.Services.AddScoped<IRepository<Route, int>, Repository<Route, int>>();
+builder.Services.AddScoped<RouteService>();
 
 
 builder.Services.AddHttpLogging(
