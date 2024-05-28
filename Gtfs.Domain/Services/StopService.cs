@@ -1,5 +1,6 @@
 using Gtfs.Domain.Interfaces;
 using Gtfs.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Gtfs.Domain.Services;
 
@@ -12,8 +13,31 @@ public class StopService
         _stopRepo = stopRepo;
     }
 
-    public Task<List<Stop>> GetStopsByAgency()
+    public async Task<List<Stop>> GetStopsByTripIds(List<int> tripIds)
     {
-        throw new NotImplementedException();
+        List<Stop> stops = await _stopRepo.GetAll()
+            .Where(stop => stop.StopTimes.Any(st => tripIds.Contains(st.TripId)))
+            .Select(stop => new Stop
+            {
+                StopId = stop.StopId,
+                Name = stop.Name,
+                Longitude = stop.Longitude,
+                Url = stop.Url,
+                ZoneId = stop.ZoneId,
+                Description = stop.Description,
+                Source = stop.Source
+            })
+            .ToListAsync();
+
+        return stops;
+    }
+
+    public async Task<List<Stop>> GetStopsByDataSource(string sourceName)
+    {
+        List<Stop> stops = await _stopRepo.GetAll()
+            .Where(stop => stop.Source.Name.Equals(sourceName))
+            .ToListAsync();
+
+        return stops;
     }
 }

@@ -63,6 +63,27 @@ public class RouteService
         return routes;
     }
     
+    public async Task<List<Route>> GetRoutesBySourceAndType(string sourceName, int routeType)
+    {
+        var routes = await _routeRepo.GetAll()
+            .Where(r => r.Agency.Source.Name.Equals(sourceName) && r.Type == routeType)
+            .Select(r => new Route
+            {
+                RouteId = r.RouteId,
+                ShortName = r.ShortName,
+                LongName = r.LongName,
+                Description = r.Description,
+                Type = r.Type,
+                Color = r.Color,
+                TextColor = r.TextColor,
+                Url = r.Url,
+                Agency = r.Agency
+            })
+            .ToListAsync();
+        
+        return routes;
+    }
+    
     public void AddRoute(Agency agency, string routeId, string routeShortName, string routeLongName,
         int type, string color, string textColor, string url)
     {

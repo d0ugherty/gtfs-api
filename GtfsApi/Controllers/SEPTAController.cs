@@ -4,7 +4,7 @@ using Gtfs.Domain.Models;
 using Gtfs.Domain.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Route = Microsoft.AspNetCore.Routing.Route;
+using Route = Gtfs.Domain.Models.Route;
 
 namespace GtfsApi.Controllers
 {
@@ -15,15 +15,19 @@ namespace GtfsApi.Controllers
 
         private readonly RouteService _routeService;
         private readonly AgencyService _agencyService;
+        private readonly TripService _tripService;
+        private readonly StopService _stopService;
 
         private readonly string _agencyName;
         private readonly string _sourceName;
         private readonly int _agencyId;
         
-        public SEPTAController(RouteService routeService, AgencyService agencyService)
+        public SEPTAController(RouteService routeService, AgencyService agencyService, StopService stopService, TripService tripService)
         {
             _routeService = routeService;
             _agencyService = agencyService;
+            _stopService = stopService;
+            _tripService = tripService;
             _agencyName = "SEPTA";
             _sourceName = "SEPTA";
             _agencyId = 3;
@@ -76,5 +80,37 @@ namespace GtfsApi.Controllers
             
             _routeService.AddRoute(agency, routeId, routeShortName, routeLongName, type, color, textColor, url);
         }
+
+        [HttpGet("stops/{agencyId}/{routeId}")]
+        public async Task<ActionResult<List<Stop>>> GetStopsByRoute(string agencyName, string routeId)
+        {
+            List<int> tripIds = await _tripService.GetTripIdsByRoute(agencyName, routeId);
+
+            List<Stop> stops = await _stopService.GetStopsByTripIds(tripIds);
+
+            return Ok(new { Stops = stops });
+        }
+
+        [HttpGet("stops/{routeType}")]
+        public async Task<ActionResult<List<Stop>>> GetStopsByRouteType(int routeType)
+        {
+            List<Route> routes = await _routeService.GetRoutesByAgencyAndType(_agencyName, routeType);
+
+            List<int> tripIds = await _tripService.GetTripIdsFromRoute(routes);
+
+            List<Stop> stops = await _stopService.GetStopsByTripIds(tripIds);
+
+            return Ok(new { Stops = stops });
+        }
+        /**
+        [HttpGet("stops/all")]
+        public async Task<ActionResult<List<Stop>>> GetAllStops()
+        {
+            List<Stop> stops = await _stopService.GetStopsByDataSource(_sourceName);
+
+            return Ok(new { Stops = stops });
+        }
+    **/
+
     }
 }
