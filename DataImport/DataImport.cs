@@ -558,40 +558,69 @@ public class DataImport
             Console.WriteLine($"{filePath} does not exist. \n Moving on to next import.");
         }
     }
-    
-    public void ImportData()
+
+    private void ImportDataFromFiles(Source source)
     {
-        ImportTry($"../data/sources.csv", ImportSources);
-
-        var sources = _sourceRepo.GetAll();
-
         List<string> transitTypes = ["rail", "bus"];
 
-        foreach (var source in sources)
+        foreach (var type in transitTypes)
         {
-            foreach (var type in transitTypes)
-            {
-                ImportTry($"{source.FilePath}/{type}/agency.csv", filePath => ImportAgencies(filePath, source));
+            ImportTry($"{source.FilePath}/{type}/agency.csv", filePath => ImportAgencies(filePath, source));
 
-                ImportTry($"{source.FilePath}/{type}/calendar.csv", filePath => ImportCalendars(filePath, source));
+            ImportTry($"{source.FilePath}/{type}/calendar.csv", filePath => ImportCalendars(filePath, source));
 
-                ImportTry($"{source.FilePath}/{type}/calendar_dates.csv", ImportCalendarDates);
+            ImportTry($"{source.FilePath}/{type}/calendar_dates.csv", ImportCalendarDates);
 
-                ImportTry($"{source.FilePath}/{type}/fare_rules.csv", filePath => ImportFares(filePath, source));
+            ImportTry($"{source.FilePath}/{type}/fare_rules.csv", filePath => ImportFares(filePath, source));
 
-                ImportTry($"{source.FilePath}/{type}/fare_attributes.csv", filePath => ImportFareAttributes(filePath, source));
-                
-                ImportTry($"{source.FilePath}/{type}/routes.csv", filePath => ImportRoutes(filePath, source));
-                
-                ImportTry($"{source.FilePath}/{type}/trips.csv", filePath => ImportTrips(filePath, source));
+            ImportTry($"{source.FilePath}/{type}/fare_attributes.csv",
+                filePath => ImportFareAttributes(filePath, source));
 
-                ImportTry($"{source.FilePath}/{type}/shapes.csv", filePath => ImportShapes(filePath, source));
-                
-                ImportTry($"{source.FilePath}/{type}/stops.csv", filePath => ImportStops(filePath, source));
+            ImportTry($"{source.FilePath}/{type}/routes.csv", filePath => ImportRoutes(filePath, source));
 
-                ImportTry($"{source.FilePath}/{type}/stop_times.csv", filePath => ImportStopTimes(filePath, source));
+            ImportTry($"{source.FilePath}/{type}/trips.csv", filePath => ImportTrips(filePath, source));
+
+            ImportTry($"{source.FilePath}/{type}/shapes.csv", filePath => ImportShapes(filePath, source));
+
+            ImportTry($"{source.FilePath}/{type}/stops.csv", filePath => ImportStops(filePath, source));
+
+            ImportTry($"{source.FilePath}/{type}/stop_times.csv", filePath => ImportStopTimes(filePath, source));
+        }
+    }
+
+    private void CreateNewSource(string sourceName)
+    {
+        _sourceRepo.Add(new Source
+        {
+            Name = sourceName.Trim(),
+            FilePath = "../data/" + sourceName
+        });
+
+        _context.SaveChanges();
+    }
+    
+    public void ImportGtfsData(string dataSourceName="")
+    {
+        if (dataSourceName.Equals(""))
+        {
+            ImportTry($"../data/sources.csv", ImportSources);
+
+            var sources = _sourceRepo.GetAll();
+            
+            foreach (var source in sources)
+            { 
+                ImportDataFromFiles(source);
             }
         }
+        else
+        {
+            CreateNewSource(dataSourceName);
+
+            Source source = _sourceRepo.GetAll().FirstOrDefault(s => s.Name.Equals(dataSourceName))!;
+
+            ImportDataFromFiles(source);
+        }
+
         Console.WriteLine("Done.");
     }
 }
