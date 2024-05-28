@@ -28,6 +28,7 @@ builder.Services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
 builder.Services.AddScoped<DbContext, GtfsContext>();
 builder.Services.AddScoped<IRepository<Route, int>, Repository<Route, int>>();
 builder.Services.AddScoped<RouteService>();
+builder.Services.AddScoped<AgencyService>();
 
 
 builder.Services.AddHttpLogging(
