@@ -21,7 +21,7 @@ public class Trip
 
 	public int ShapeId { get; set; }
 
-	public ICollection<StopTime> StopTimes = new List<StopTime>();
+	public List<StopTime> StopTimes { get; set; }
 	
 	[ForeignKey("Route")]
 	public int RouteId { get; set; }
@@ -31,4 +31,9 @@ public class Trip
 	[ForeignKey("Source")]
 	public int SourceId { get; set; }
 	public required Source Source { get; set; }
+
+	public Trip()
+	{
+		StopTimes = new List<StopTime>();
+	}
 }

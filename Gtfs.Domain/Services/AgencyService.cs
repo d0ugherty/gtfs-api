@@ -16,7 +16,18 @@ public class AgencyService
     public async Task<Agency> GetAgencyByName(string agencyName)
     {
         var agency = await _agencyRepo.GetAll()
-            .FirstOrDefaultAsync(a => a.Name.Equals(agencyName));
+            .Where(agency => agency.Name.Equals(agencyName))
+            .Select(agency => new Agency
+            {
+                Id = agency.Id,
+                AgencyId = agency.AgencyId,
+                Name = agency.Name,
+                Url = agency.Url,
+                Timezone = agency.Timezone,
+                Language = agency.Language,
+                Email = agency.Email
+            })
+            .SingleAsync();
 
         return agency;
     }
@@ -32,6 +43,16 @@ public class AgencyService
     {
         var agencies = await _agencyRepo.GetAll()
             .Where(a => a.Source.Name.Equals(sourceName))
+            .Select(agency => new Agency
+            {
+                Id = agency.Id,
+                AgencyId = agency.AgencyId,
+                Name = agency.Name,
+                Url = agency.Url,
+                Timezone = agency.Timezone,
+                Language = agency.Language,
+                Email = agency.Email
+            })
             .ToListAsync();
 
         return agencies;

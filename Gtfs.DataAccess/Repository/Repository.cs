@@ -14,7 +14,7 @@ public class Repository<T,K> : IRepository<T,K> where T : class
 
 	public IQueryable<T> GetAll()
 	{
-		return _dbSet.AsQueryable();
+		return _dbSet;
 	}
 
 	public T GetById(K id)

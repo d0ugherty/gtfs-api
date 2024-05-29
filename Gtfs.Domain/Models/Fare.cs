@@ -5,9 +5,9 @@ namespace Gtfs.Domain.Models;
 public class Fare
 {
 	public int Id { get; set; }
-	public string FareId { get; set; } = null!; 
-	public string OriginId { get; set; } = null!;
-	public string DestinationId { get; set; } = null!;
+	public string? FareId { get; set; }
+	public string? OriginId { get; set; }
+	public string? DestinationId { get; set; }
 	
 	[ForeignKey("Source")]
 	public int SourceId { get; set; }

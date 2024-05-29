@@ -23,10 +23,15 @@ public class Route
 	
 	public string? Url { get; set; }
 
-	public ICollection<Trip> Trips = new List<Trip>();
+	public List<Trip> Trips { get; set; }
 
 	[ForeignKey("Agency")] 
 	public int AgencyId { get; set; }
 
 	public required Agency Agency { get; set; }
+
+	public Route()
+	{
+		Trips = new List<Trip>();
+	}
 }

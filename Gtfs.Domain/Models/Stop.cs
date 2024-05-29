@@ -20,11 +20,15 @@ public class Stop
 
 	public string? Url { get; set; }
 
-	public ICollection<StopTime> StopTimes = new List<StopTime>();
+	public List<StopTime> StopTimes { get; set; }
 
 	[ForeignKey("Source")] 
 	public int SourceId { get; set; }
 
 	public required Source Source { get; set; }
 
+	public Stop()
+	{
+		StopTimes = new List<StopTime>();
+	}
 }

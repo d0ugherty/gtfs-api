@@ -1,0 +1,2 @@
+dotnet ef migrations add InitialCreate --project Gtfs.DataAccess --startup-project GtfsApi --context GtfsContext --verbose
+dotnet ef migrations add InitialCreate --project Gtfs.DataAccess --startup-project GtfsApi --context GtfsContext --verbose

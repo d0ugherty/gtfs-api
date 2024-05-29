@@ -6,6 +6,13 @@ public class Source
 	public required string Name { get; set; }
 	public required string FilePath { get; set; }
 	
-	public ICollection<Agency> Agencies = new List<Agency>();
-	public ICollection<Calendar> Calendars = new List<Calendar>();
+	public List<Agency> Agencies { get; set; }
+	public List<Calendar> Calendars { get; set; }
+
+	public Source()
+	{
+		Agencies = new List<Agency>();
+		Calendars = new List<Calendar>();
+	}
+	
 }

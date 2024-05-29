@@ -5,7 +5,7 @@ namespace Gtfs.Domain.Models;
 public class Calendar
 {
 	public int Id { get; set; }
-	public string ServiceId { get; set; } = null!;
+	public string? ServiceId { get; set; }
 
 	public int Monday { get; set; }
 	public int Tuesday { get; set; }

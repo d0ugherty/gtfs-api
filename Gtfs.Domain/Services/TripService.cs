@@ -39,13 +39,14 @@ public class TripService
         foreach (var route in routes)
         {
             Console.WriteLine($"ROUTE TRIPS {route.Trips}");
+            Console.WriteLine($"ROUTE TRIPS LENGTH {route.Trips.Count}");
+
+            Console.WriteLine($"ROUTE: {route.ShortName}");
             foreach (var trip in route.Trips)
             {
                 Console.WriteLine($"TRIP {trip}");
-
             }
         }
-
         return tripIds;
     }
 }

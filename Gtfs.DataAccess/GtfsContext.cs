@@ -52,14 +52,14 @@ namespace Gtfs.DataAccess {
 			modelBuilder.Entity<Agency>()
 				.HasKey(a => a.Id);
 			
+			modelBuilder.Entity<Route>()
+				.HasMany(route => route.Trips)
+				.WithOne(trip => trip.Route)
+				.HasForeignKey(trip => trip.RouteId);
+			
 			modelBuilder.Entity<Trip>()
-				.HasOne(t => t.Route)
-				.WithMany(r => r.Trips)
-				.HasForeignKey(t => t.RouteId);
-
-			modelBuilder.Entity<StopTime>()
-				.HasOne(st => st.Trip)
-				.WithMany(t => t.StopTimes)
+				.HasMany(trip => trip.StopTimes)
+				.WithOne(st => st.Trip)
 				.HasForeignKey(st => st.TripId);
 
 			modelBuilder.Entity<Stop>()
@@ -67,10 +67,10 @@ namespace Gtfs.DataAccess {
 				.WithOne(st => st.Stop)
 				.HasForeignKey(st => st.StopId);
 
-			modelBuilder.Entity<Agency>()
-				.HasOne(a => a.Source)
-				.WithMany(s => s.Agencies)
-				.HasForeignKey(a => a.SourceId);
+			modelBuilder.Entity<Source>()
+				.HasMany(source => source.Agencies)
+				.WithOne(agency => agency.Source)
+				.HasForeignKey(agency => agency.SourceId);
 		}
 	}
 }

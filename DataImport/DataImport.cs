@@ -6,25 +6,26 @@ using Gtfs.DataAccess;
 using Gtfs.DataAccess.Repository;
 using Gtfs.Domain.Interfaces;
 using Gtfs.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 using Calendar = Gtfs.Domain.Models.Calendar;
 
 namespace DataImport;
 
 public class DataImport
 {
-    private readonly GtfsContext _context;
+    private GtfsContext _context;
 
-    private readonly Repository<Source, int> _sourceRepo;
-    private readonly Repository<Agency, string> _agencyRepo;
-    private readonly Repository<Route, int> _routeRepo;
-    private readonly Repository<Calendar, int> _calendarRepo;
-    private readonly Repository<CalendarDate, int> _calendarDateRepo;
-    private readonly Repository<Fare, string> _fareRepo;
-    private readonly Repository<FareAttributes, int> _fareAttributesRepo;
-    private readonly Repository<Shape, int> _shapeRepo;
-    private readonly Repository<Stop, int> _stopRepo;
-    private readonly Repository<StopTime, int> _stopTimeRepo;
-    private readonly Repository<Trip, int> _tripRepo;
+    private Repository<Source, int> _sourceRepo;
+    private Repository<Agency, string> _agencyRepo;
+    private Repository<Route, int> _routeRepo;
+    private Repository<Calendar, int> _calendarRepo;
+    private Repository<CalendarDate, int> _calendarDateRepo;
+    private Repository<Fare, string> _fareRepo;
+    private Repository<FareAttributes, int> _fareAttributesRepo;
+    private Repository<Shape, int> _shapeRepo;
+    private Repository<Stop, int> _stopRepo;
+    private Repository<StopTime, int> _stopTimeRepo;
+    private Repository<Trip, int> _tripRepo;
 
 
     public DataImport(GtfsContext context)
@@ -110,6 +111,7 @@ public class DataImport
                 _agencyRepo.Add(agency);
 
                 source.Agencies.Add(agency);
+                _context.Sources.Update(source);
 
                 row++;
             }
@@ -138,6 +140,7 @@ public class DataImport
                 Console.Write($"{new string(' ', 20)}Importing row {row}\r");
 
                 var agency = _agencyRepo.GetAll()
+                    .Include( a => a.Routes)
                     .FirstOrDefault(a => a.AgencyId.Equals(record.agency_id) && a.SourceId == source.Id);
 
                 var route = new Route
@@ -157,6 +160,7 @@ public class DataImport
                 _routeRepo.Add(route);
 
                 agency.Routes.Add(route);
+                _context.Agencies.Update(agency);
                 
                 row++;
             }
@@ -204,6 +208,8 @@ public class DataImport
                 _calendarRepo.Add(calendar);
 
                 source.Calendars.Add(calendar);
+
+                _context.Sources.Update(source);
                 
                 row++;
             }
@@ -456,6 +462,9 @@ public class DataImport
                 stop.StopTimes.Add(stopTime);
                 trip.StopTimes!.Add(stopTime);
 
+                _context.Stops.Update(stop);
+                _context.Trips.Update(trip);
+
                 row++;
             }
             Console.WriteLine("Saving changes.");
@@ -480,7 +489,8 @@ public class DataImport
             int row = 1;
 
             var routes = _routeRepo.GetAll()
-                .Where(r => r.Agency.SourceId == source.Id)
+                .Include(r => r.Trips)
+                .Where(r => r.Agency.Source.Name.Equals(source.Name))
                 .ToList();
             
             foreach (var record in records)
@@ -504,6 +514,7 @@ public class DataImport
                 };
 
                 _tripRepo.Add(trip);
+
                 route.Trips.Add(trip);
 
                 row++;
@@ -512,7 +523,7 @@ public class DataImport
 
             _context.SaveChanges();
         }
-        catch (InvalidOperationException ex)
+        catch (Exception ex)
         {
             Console.WriteLine($"Invalid operation occurred during importing of \n " +
                               $"{filePath} \n " +

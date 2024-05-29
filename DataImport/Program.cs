@@ -18,8 +18,13 @@ namespace DataImport
 
             var importService = new DataImport(new GtfsContext(options));
 
-            string sourceName = args[0];
+            string sourceName = "";
             
+            if (args.Length > 0)
+            {
+                sourceName = args[0];
+            }
+
             importService.ImportGtfsData(sourceName);
 		    
             Console.WriteLine("Data import completed successfully.");

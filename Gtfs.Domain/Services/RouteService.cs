@@ -20,11 +20,32 @@ public class RouteService
         return route;
     }
 
-    public async Task<List<Route>> GetRoutesByAgency(string agencyName)
+    public async Task<List<Route>> GetRoutesByAgencyName(string agencyName)
+    {
+        var routes = await _routeRepo.GetAll()
+            .Where(r => r.Agency.Name.Equals(agencyName))
+            .Select(r => new Route
+            {
+                RouteId = r.RouteId,
+                ShortName = r.ShortName,
+                LongName = r.LongName,
+                Description = r.Description,
+                Type = r.Type,
+                Color = r.Color,
+                TextColor = r.TextColor,
+                Url = r.Url,
+                Agency = r.Agency
+            })
+            .ToListAsync();
+        
+        return routes;
+    }
+
+    public async Task<List<Route>> GetRoutesBySource(string sourceName)
     {
         var routes = await _routeRepo.GetAll()
             .Include(r => r.Agency)
-            .Where(r => r.Agency.Name.Equals(agencyName))
+            .Where(r => r.Agency.Source.Name.Equals(sourceName))
             .Select(r => new Route
             {
                 RouteId = r.RouteId,
@@ -45,20 +66,21 @@ public class RouteService
     public async Task<List<Route>> GetRoutesByAgencyAndType(string agencyName, int routeType)
     {
         var routes = await _routeRepo.GetAll()
-                    .Where(r => r.Agency.Name.Equals(agencyName) && r.Type == routeType)
-                    .Select(r => new Route
-                    {
-                        RouteId = r.RouteId,
-                        ShortName = r.ShortName,
-                        LongName = r.LongName,
-                        Description = r.Description,
-                        Type = r.Type,
-                        Color = r.Color,
-                        TextColor = r.TextColor,
-                        Url = r.Url,
-                        Agency = r.Agency
-                    })
-                    .ToListAsync();
+            .Include(r => r.Trips)
+            .Where(r => r.Agency.Name.Equals(agencyName) && r.Type == routeType)
+            .Select(r => new Route
+            {
+                RouteId = r.RouteId,
+                ShortName = r.ShortName,
+                LongName = r.LongName,
+                Description = r.Description,
+                Type = r.Type,
+                Color = r.Color,
+                TextColor = r.TextColor,
+                Url = r.Url,
+                Agency = r.Agency
+            })
+            .ToListAsync();
         
         return routes;
     }

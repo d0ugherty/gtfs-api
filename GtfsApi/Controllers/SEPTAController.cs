@@ -1,8 +1,5 @@
-using System.ComponentModel;
-using Gtfs.DataAccess;
 using Gtfs.Domain.Models;
 using Gtfs.Domain.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Route = Gtfs.Domain.Models.Route;
 
@@ -30,7 +27,7 @@ namespace GtfsApi.Controllers
             _tripService = tripService;
             _agencyName = "SEPTA";
             _sourceName = "SEPTA";
-            _agencyId = 3;
+            _agencyId = 73;
         }
 
         [HttpGet("agencies/all")]
@@ -44,7 +41,7 @@ namespace GtfsApi.Controllers
         [HttpGet("routes/all")]
         public async Task<ActionResult<List<Route>>> GetAllRoutes()
         {
-            var routes = await _routeService.GetRoutesByAgency(_agencyName);
+            var routes = await _routeService.GetRoutesByAgencyName(_agencyName);
 
             return Ok(new { Routes = routes });
         }
