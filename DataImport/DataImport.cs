@@ -153,14 +153,13 @@ public class DataImport
                     Color = record.route_color,
                     TextColor = record.route_text_color,
                     Url = record.route_url,
-                    AgencyId = agency!.Id,
+                    AgencyId = agency.Id,
                     Agency = agency
                 };
                 
                 _routeRepo.Add(route);
 
                 agency.Routes.Add(route);
-                _context.Agencies.Update(agency);
                 
                 row++;
             }

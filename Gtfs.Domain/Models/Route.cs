@@ -5,7 +5,7 @@ namespace Gtfs.Domain.Models;
 public class Route
 {
 	
-	public int Id;
+	public int Id { get; set; }
 	
 	public required string RouteId { get; set; } = null!;
 	

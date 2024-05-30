@@ -4,7 +4,7 @@ namespace Gtfs.Domain.Models;
 
 public class Shape
 {
-	public int Id;
+	public int Id { get; set; }
 	
 	public int ShapeId { get; set; }
 	
