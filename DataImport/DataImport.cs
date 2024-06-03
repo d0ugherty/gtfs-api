@@ -6,26 +6,25 @@ using Gtfs.DataAccess;
 using Gtfs.DataAccess.Repository;
 using Gtfs.Domain.Interfaces;
 using Gtfs.Domain.Models;
-using Microsoft.EntityFrameworkCore;
 using Calendar = Gtfs.Domain.Models.Calendar;
 
 namespace DataImport;
 
 public class DataImport
 {
-    private GtfsContext _context;
+    private readonly GtfsContext _context;
 
-    private Repository<Source, int> _sourceRepo;
-    private Repository<Agency, string> _agencyRepo;
-    private Repository<Route, int> _routeRepo;
-    private Repository<Calendar, int> _calendarRepo;
-    private Repository<CalendarDate, int> _calendarDateRepo;
-    private Repository<Fare, string> _fareRepo;
-    private Repository<FareAttributes, int> _fareAttributesRepo;
-    private Repository<Shape, int> _shapeRepo;
-    private Repository<Stop, int> _stopRepo;
-    private Repository<StopTime, int> _stopTimeRepo;
-    private Repository<Trip, int> _tripRepo;
+    private readonly Repository<Source, int> _sourceRepo;
+    private readonly Repository<Agency, string> _agencyRepo;
+    private readonly Repository<Route, int> _routeRepo;
+    private readonly Repository<Calendar, int> _calendarRepo;
+    private readonly Repository<CalendarDate, int> _calendarDateRepo;
+    private readonly Repository<Fare, string> _fareRepo;
+    private readonly Repository<FareAttributes, int> _fareAttributesRepo;
+    private readonly Repository<Shape, int> _shapeRepo;
+    private readonly Repository<Stop, int> _stopRepo;
+    private readonly Repository<StopTime, int> _stopTimeRepo;
+    private readonly Repository<Trip, int> _tripRepo;
 
 
     public DataImport(GtfsContext context)
@@ -98,7 +97,7 @@ public class DataImport
 
                 var agency = new Agency
                 {
-                    AgencyId = record.agency_id.Trim(),
+                    AgencyNumber = record.agency_id.Trim(),
                     Name = record.agency_name.Trim(),
                     Url = record.agency_url!.Trim(),
                     Timezone = record.agency_timezone!.Trim(),
@@ -111,7 +110,6 @@ public class DataImport
                 _agencyRepo.Add(agency);
 
                 source.Agencies.Add(agency);
-                _context.Sources.Update(source);
 
                 row++;
             }
@@ -140,12 +138,11 @@ public class DataImport
                 Console.Write($"{new string(' ', 20)}Importing row {row}\r");
 
                 var agency = _agencyRepo.GetAll()
-                    .Include( a => a.Routes)
-                    .FirstOrDefault(a => a.AgencyId.Equals(record.agency_id) && a.SourceId == source.Id);
+                    .FirstOrDefault(a => a.AgencyNumber.Equals(record.agency_id) && a.SourceId == source.Id);
 
                 var route = new Route
                 {
-                    RouteId = record.route_id,
+                    RouteNumber = record.route_id,
                     ShortName = record.route_short_name,
                     LongName = record.route_long_name,
                     Description = record.route_desc,
@@ -153,13 +150,13 @@ public class DataImport
                     Color = record.route_color,
                     TextColor = record.route_text_color,
                     Url = record.route_url,
-                    AgencyId = agency.Id,
+                    AgencyId = agency?.Id,
                     Agency = agency
                 };
                 
                 _routeRepo.Add(route);
 
-                agency.Routes.Add(route);
+                agency?.Routes.Add(route);
                 
                 row++;
             }
@@ -207,8 +204,6 @@ public class DataImport
                 _calendarRepo.Add(calendar);
 
                 source.Calendars.Add(calendar);
-
-                _context.Sources.Update(source);
                 
                 row++;
             }
@@ -273,7 +268,7 @@ public class DataImport
 
                 _fareRepo.Add(new Fare
                 {
-                    FareId = record.fare_id,
+                    FareNumber = record.fare_id,
                     OriginId = record.origin_id,
                     DestinationId = record.destination_id,
                     SourceId = source.Id,
@@ -308,7 +303,7 @@ public class DataImport
                 Console.Write($"{new string(' ', 20)}Importing row {row}\r");
 
                 var fare = _fareRepo.GetAll()
-                    .FirstOrDefault(f => f.FareId.Equals(record.fare_id) && f.SourceId == source.Id);
+                    .FirstOrDefault(f => f.FareNumber!.Equals(record.fare_id) && f.SourceId == source.Id);
 
                 var fareAttributes = new FareAttributes
                 {
@@ -355,7 +350,7 @@ public class DataImport
                 
                 var shape = new Shape
                 {
-                    ShapeId = record.shape_id,
+                    ShapeNumber = record.shape_id,
                     ShapePtLat = record.shape_pt_lat,
                     ShapePtLon = record.shape_pt_lon,
                     Sequence = record.shape_pt_sequence,
@@ -394,8 +389,8 @@ public class DataImport
 
                 _stopRepo.Add(new Stop
                 {
-                    StopId = record.stop_id,
                     Name = record.stop_name,
+                    StopNumber = record.stop_id,
                     Description = record.stop_desc,
                     Latitude = record.stop_lat,
                     Longitude = record.stop_lon,
@@ -433,15 +428,15 @@ public class DataImport
                 .ToList();
 
             var trips = _tripRepo.GetAll()
-                .Where(t => t.Route.Agency.SourceId == source.Id)
+                .Where(t => t.Route.Agency!.SourceId == source.Id)
                 .ToList();
             
             foreach (var record in records)
             {
                 Console.Write($"{new string(' ', 20)}Importing row {row}\r");
 
-                var stop = stops.FirstOrDefault(s => s.StopId.Equals(record.stop_id));
-                var trip = trips.FirstOrDefault(t => t.TripId.Equals(record.trip_id));
+                var stop = stops.FirstOrDefault(s => s.StopNumber.Equals(record.stop_id));
+                var trip = trips.FirstOrDefault(t => t.TripNumber.Equals(record.trip_id));
 
                 var stopTime = new StopTime
                 {
@@ -460,9 +455,6 @@ public class DataImport
                 
                 stop.StopTimes.Add(stopTime);
                 trip.StopTimes!.Add(stopTime);
-
-                _context.Stops.Update(stop);
-                _context.Trips.Update(trip);
 
                 row++;
             }
@@ -488,32 +480,30 @@ public class DataImport
             int row = 1;
 
             var routes = _routeRepo.GetAll()
-                .Include(r => r.Trips)
-                .Where(r => r.Agency.Source.Name.Equals(source.Name))
+                .Where(r => r.Agency!.SourceId == source.Id)
                 .ToList();
             
             foreach (var record in records)
             {
                 Console.Write($"{new string(' ', 20)}Importing row {row}\r");
 
-                var route = routes.Find(r => r.RouteId.Equals(record.route_id));
+                var route = routes.Find(r => r.RouteNumber.Equals(record.route_id));
 
                 var trip = new Trip
                 {
                     ServiceId = record.service_id,
-                    TripId = record.trip_id,
+                    TripNumber = record.trip_id,
                     Headsign = record.trip_headsign,
                     BlockId = record.block_id,
                     ShortName = record.trip_short_name,
                     DirectionId = record.direction_id,
-                    RouteId = route.Id,
+                    RouteId = route!.Id,
                     Route = route,
                     SourceId = source.Id,
                     Source = source
                 };
 
                 _tripRepo.Add(trip);
-
                 route.Trips.Add(trip);
 
                 row++;
@@ -522,7 +512,7 @@ public class DataImport
 
             _context.SaveChanges();
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             Console.WriteLine($"Invalid operation occurred during importing of \n " +
                               $"{filePath} \n " +
