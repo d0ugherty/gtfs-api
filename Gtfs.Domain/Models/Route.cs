@@ -7,7 +7,7 @@ public class Route
 	
 	public int Id { get; set; }
 	
-	public required string RouteId { get; set; } = null!;
+	public required string RouteNumber { get; set; } = null!;
 	
 	public string? ShortName { get; set; }
 	
@@ -26,9 +26,9 @@ public class Route
 	public List<Trip> Trips { get; set; }
 
 	[ForeignKey("Agency")] 
-	public int AgencyId { get; set; }
+	public int? AgencyId { get; set; }
 
-	public required Agency Agency { get; set; }
+	public Agency? Agency { get; set; }
 
 	public Route()
 	{

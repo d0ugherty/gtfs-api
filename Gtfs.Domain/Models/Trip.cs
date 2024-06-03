@@ -8,7 +8,7 @@ public class Trip
 	
 	public required string ServiceId { get; set; }
 	
-	public required string TripId { get; set; }
+	public required string TripNumber { get; set; }
 
 	public string? Headsign { get; set; }
 

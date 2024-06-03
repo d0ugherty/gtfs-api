@@ -6,7 +6,7 @@ public class Stop
 {
 	public int Id { get; set; }
 
-	public required string StopId { get; set; }
+	public required string StopNumber { get; set; }
 
 	public string? Name { get; set; }
 

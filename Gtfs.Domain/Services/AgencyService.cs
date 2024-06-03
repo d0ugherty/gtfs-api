@@ -20,7 +20,7 @@ public class AgencyService
             .Select(agency => new Agency
             {
                 Id = agency.Id,
-                AgencyId = agency.AgencyId,
+                AgencyNumber = agency.AgencyNumber,
                 Name = agency.Name,
                 Url = agency.Url,
                 Timezone = agency.Timezone,
@@ -46,7 +46,7 @@ public class AgencyService
             .Select(agency => new Agency
             {
                 Id = agency.Id,
-                AgencyId = agency.AgencyId,
+                AgencyNumber = agency.AgencyNumber,
                 Name = agency.Name,
                 Url = agency.Url,
                 Timezone = agency.Timezone,

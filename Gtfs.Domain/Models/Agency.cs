@@ -6,7 +6,8 @@ public class Agency
 {
 	public int Id { get; set; }
 	
-	public required string AgencyId { get; set; }
+	public required string AgencyNumber { get; set; }
+	
 	public required string Name { get; set; }
 	
 	public string? Url { get; set; }

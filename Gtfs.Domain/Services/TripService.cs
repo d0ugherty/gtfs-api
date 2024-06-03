@@ -13,19 +13,21 @@ public class TripService
         _tripRepo = tripRepo;
     }
 
-    public async Task<List<Trip>> GetTripsByRoute(int agencyId, string routeId)
+    public async Task<List<Trip>> GetTripsByRoute(int agencyId, string RouteNumber)
     {
         var trips = await _tripRepo.GetAll()
-            .Where(trip => trip.Route.RouteId.Equals(routeId) && trip.Route.AgencyId == agencyId)
+            .Where(trip => trip.Route.RouteNumber.Equals(RouteNumber) && trip.Route.AgencyId == agencyId)
             .ToListAsync();
 
         return trips;
     }
     
-    public async Task<List<int>> GetTripIdsByRoute(string agencyName, string routeId)
+    public async Task<List<int>> GetTripIdsByRoute(string agencyName, string RouteNumber)
     {
         var trips = await _tripRepo.GetAll()
-            .Where(trip => trip.Route.RouteId.Equals(routeId) && trip.Route.Agency.Name.Equals(agencyName.ToUpper()))
+            .Where(trip => trip.Route.Agency != null && 
+                           trip.Route.RouteNumber.Equals(RouteNumber) && 
+                           trip.Route.Agency.Name.Equals(agencyName.ToUpper()))
             .Select(trip => trip.Id)
             .ToListAsync();
 

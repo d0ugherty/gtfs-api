@@ -6,7 +6,7 @@ public class Shape
 {
 	public int Id { get; set; }
 	
-	public int ShapeId { get; set; }
+	public int ShapeNumber { get; set; }
 	
 	public float ShapePtLat { get; set; }
 	

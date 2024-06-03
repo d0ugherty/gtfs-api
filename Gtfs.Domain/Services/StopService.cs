@@ -19,7 +19,7 @@ public class StopService
             .Where(stop => stop.StopTimes.Any(st => tripIds.Contains(st.TripId)))
             .Select(stop => new Stop
             {
-                StopId = stop.StopId,
+                StopNumber = stop.StopNumber,
                 Name = stop.Name,
                 Longitude = stop.Longitude,
                 Url = stop.Url,

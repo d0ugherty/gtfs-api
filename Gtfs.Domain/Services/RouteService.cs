@@ -26,7 +26,7 @@ public class RouteService
             .Where(r => r.Agency.Name.Equals(agencyName))
             .Select(r => new Route
             {
-                RouteId = r.RouteId,
+                RouteNumber = r.RouteNumber,
                 ShortName = r.ShortName,
                 LongName = r.LongName,
                 Description = r.Description,
@@ -48,7 +48,7 @@ public class RouteService
             .Where(r => r.Agency.Source.Name.Equals(sourceName))
             .Select(r => new Route
             {
-                RouteId = r.RouteId,
+                RouteNumber = r.RouteNumber,
                 ShortName = r.ShortName,
                 LongName = r.LongName,
                 Description = r.Description,
@@ -70,7 +70,7 @@ public class RouteService
             .Where(r => r.Agency.Name.Equals(agencyName) && r.Type == routeType)
             .Select(r => new Route
             {
-                RouteId = r.RouteId,
+                RouteNumber = r.RouteNumber,
                 ShortName = r.ShortName,
                 LongName = r.LongName,
                 Description = r.Description,
@@ -91,7 +91,7 @@ public class RouteService
             .Where(r => r.Agency.Source.Name.Equals(sourceName) && r.Type == routeType)
             .Select(r => new Route
             {
-                RouteId = r.RouteId,
+                RouteNumber = r.RouteNumber,
                 ShortName = r.ShortName,
                 LongName = r.LongName,
                 Description = r.Description,
@@ -106,12 +106,12 @@ public class RouteService
         return routes;
     }
     
-    public void AddRoute(Agency agency, string routeId, string routeShortName, string routeLongName,
+    public void AddRoute(Agency agency, string RouteNumber, string routeShortName, string routeLongName,
         int type, string color, string textColor, string url)
     {
         var route = new Route
         {
-            RouteId = routeId,
+            RouteNumber = RouteNumber,
             ShortName = routeShortName,
             LongName = routeLongName,
             Type = type,
