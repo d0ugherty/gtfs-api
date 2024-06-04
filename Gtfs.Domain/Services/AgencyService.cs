@@ -57,4 +57,14 @@ public class AgencyService
 
         return agencies;
     }
+
+    public int GetAgencyIdByNameAndSource(string agencyName, string sourceName)
+    {
+        var agencyId = _agencyRepo.GetAll()
+            .Where(a => a.Source.Name.Equals(sourceName) && a.Name.Equals(agencyName))
+            .Select(a => a.Id)
+            .FirstOrDefault();
+
+        return agencyId;
+    }
 }

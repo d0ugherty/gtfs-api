@@ -27,7 +27,7 @@ namespace GtfsApi.Controllers
             _tripService = tripService;
             _agencyName = "SEPTA";
             _sourceName = "SEPTA";
-            _agencyId = 73;
+            _agencyId = _agencyService.GetAgencyIdByNameAndSource(_agencyName, _sourceName);
         }
 
         [HttpGet("agencies/all")]
@@ -93,7 +93,7 @@ namespace GtfsApi.Controllers
         {
             List<Route> routes = await _routeService.GetRoutesByAgencyAndType(_agencyName, routeType);
 
-            List<int> tripIds = await _tripService.GetTripIdsFromRoute(routes);
+            List<int> tripIds = await _tripService.GetTripIdsFromRouteList(routes, _agencyName);
 
             List<Stop> stops = await _stopService.GetStopsByTripIds(tripIds);
 

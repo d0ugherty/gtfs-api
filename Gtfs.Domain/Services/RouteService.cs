@@ -23,7 +23,7 @@ public class RouteService
     public async Task<List<Route>> GetRoutesByAgencyName(string agencyName)
     {
         var routes = await _routeRepo.GetAll()
-            .Where(r => r.Agency.Name.Equals(agencyName))
+            .Where(r => r.Agency != null && r.Agency.Name.Equals(agencyName))
             .Select(r => new Route
             {
                 RouteNumber = r.RouteNumber,
@@ -45,7 +45,7 @@ public class RouteService
     {
         var routes = await _routeRepo.GetAll()
             .Include(r => r.Agency)
-            .Where(r => r.Agency.Source.Name.Equals(sourceName))
+            .Where(r => r.Agency != null && r.Agency.Source.Name.Equals(sourceName))
             .Select(r => new Route
             {
                 RouteNumber = r.RouteNumber,
@@ -67,7 +67,9 @@ public class RouteService
     {
         var routes = await _routeRepo.GetAll()
             .Include(r => r.Trips)
-            .Where(r => r.Agency.Name.Equals(agencyName) && r.Type == routeType)
+            .Where(r => r.Agency != null 
+                        && r.Agency.Name.Equals(agencyName) 
+                        && r.Type == routeType)
             .Select(r => new Route
             {
                 RouteNumber = r.RouteNumber,
@@ -88,7 +90,10 @@ public class RouteService
     public async Task<List<Route>> GetRoutesBySourceAndType(string sourceName, int routeType)
     {
         var routes = await _routeRepo.GetAll()
-            .Where(r => r.Agency.Source.Name.Equals(sourceName) && r.Type == routeType)
+            .Include(r => r.Trips)
+            .Where(r => r.Agency != null 
+                        && r.Agency.Name.Equals(sourceName) 
+                        && r.Type == routeType)
             .Select(r => new Route
             {
                 RouteNumber = r.RouteNumber,
@@ -106,12 +111,12 @@ public class RouteService
         return routes;
     }
     
-    public void AddRoute(Agency agency, string RouteNumber, string routeShortName, string routeLongName,
+    public void AddRoute(Agency agency, string routeNumber, string routeShortName, string routeLongName,
         int type, string color, string textColor, string url)
     {
         var route = new Route
         {
-            RouteNumber = RouteNumber,
+            RouteNumber = routeNumber,
             ShortName = routeShortName,
             LongName = routeLongName,
             Type = type,
