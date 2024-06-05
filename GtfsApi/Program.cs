@@ -27,10 +27,12 @@ builder.Services.AddControllers();
 builder.Services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
 builder.Services.AddScoped<DbContext, GtfsContext>();
 builder.Services.AddScoped<IRepository<Route, int>, Repository<Route, int>>();
+
 builder.Services.AddScoped<RouteService>();
 builder.Services.AddScoped<AgencyService>();
 builder.Services.AddScoped<StopService>();
 builder.Services.AddScoped<TripService>();
+builder.Services.AddScoped<StopTimeService>();
 
 builder.Services.AddHttpLogging(
     opts => opts.LoggingFields = HttpLoggingFields.RequestProperties);

@@ -14,19 +14,23 @@ namespace GtfsApi.Controllers
         private readonly AgencyService _agencyService;
         private readonly TripService _tripService;
         private readonly StopService _stopService;
+        private readonly StopTimeService _stopTimeService;
 
         private readonly string _agencyName;
         private readonly string _sourceName;
         private readonly int _agencyId;
         
-        public SEPTAController(RouteService routeService, AgencyService agencyService, StopService stopService, TripService tripService)
+        public SEPTAController(RouteService routeService, AgencyService agencyService, StopService stopService, TripService tripService, StopTimeService stopTimeService)
         {
             _routeService = routeService;
             _agencyService = agencyService;
             _stopService = stopService;
             _tripService = tripService;
+            _stopTimeService = stopTimeService;
+            
             _agencyName = "SEPTA";
             _sourceName = "SEPTA";
+            
             _agencyId = _agencyService.GetAgencyIdByNameAndSource(_agencyName, _sourceName);
         }
 
@@ -93,9 +97,11 @@ namespace GtfsApi.Controllers
         {
             List<Route> routes = await _routeService.GetRoutesByAgencyAndType(_agencyName, routeType);
 
-            List<int> tripIds = await _tripService.GetTripIdsFromRouteList(routes, _agencyName);
+            List<Trip> trips = await _tripService.GetTripsFromRouteList(routes, _agencyName);
 
-            List<Stop> stops = await _stopService.GetStopsByTripIds(tripIds);
+            List<StopTime> stopTimes = await _stopTimeService.GetStopTimesFromTripList(trips);
+
+            List<Stop> stops = await _stopService.GetStopsFromStopTimes(stopTimes);
 
             return Ok(new { Stops = stops });
         }

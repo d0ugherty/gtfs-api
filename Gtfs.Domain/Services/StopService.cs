@@ -32,12 +32,20 @@ public class StopService
         return stops;
     }
 
-    public async Task<List<Stop>> GetStopsByDataSource(string sourceName)
+    public async Task<List<Stop>> GetStopsFromStopTimes(List<StopTime> stopTimes)
     {
-        List<Stop> stops = await _stopRepo.GetAll()
-            .Where(stop => stop.Source.Name.Equals(sourceName))
-            .ToListAsync();
+        List<Stop> stops = new List<Stop>();
+
+        foreach (var stopTime in stopTimes)
+        {
+            var stop = await _stopRepo.GetAll()
+                .Where(s => s.Id == stopTime.Stop.Id)
+                .SingleAsync();
+
+            stops.Add(stop);
+        }
 
         return stops;
     }
+    
 }

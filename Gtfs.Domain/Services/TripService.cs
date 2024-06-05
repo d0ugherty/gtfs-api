@@ -47,17 +47,20 @@ public class TripService
     }
 
     
-    public async Task<List<int>> GetTripIdsFromRouteList(List<Route> routes, string agencyName)
+    public async Task<List<Trip>> GetTripsFromRouteList(List<Route> routes, string agencyName)
     {
-
-        var tripIds = new List<int>();
+        var trips = new List<Trip>();
 
         foreach (var route in routes)
         {
-            var trips = await GetTripsByRoute(agencyName, route.RouteNumber);
+            var trip = await _tripRepo.GetAll()
+                .FirstOrDefaultAsync(trip => trip.Route.Agency != null
+                                             && trip.Route.RouteNumber.Equals(route.RouteNumber)
+                                             && trip.Route.Agency.Name.Equals(agencyName));
 
-            tripIds.AddRange(trips.Select(trip => trip.Id));
-        }        
-        return tripIds;
+            trips.Add(trip);
+        }  
+        
+        return trips;
     }
 }
